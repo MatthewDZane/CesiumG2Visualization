@@ -1,0 +1,13 @@
+Name,Content types,Label,Group name,Type,Required,Description,ID,Weight,Default,Filter logic,UI visibility,Choices,Created,Last updated
+info,dcim.device,Info,,JSON,False,,2,100,,Loose,Read/Write,[],2022-07-12 11:21,2022-07-12 11:21
+location_world_location_offset,dcim.location,Location World Location Offset,,Text,False,,12,100,,Loose,Read/Write,[],2022-09-12 06:18,2022-09-12 06:18
+location_world_rotation_offset,dcim.location,Location World Rotation Offset,,Text,False,,13,100,,Loose,Read/Write,[],2022-09-12 06:21,2022-09-12 06:21
+logo,dcim.region,,,URL,False,,1,100,,Loose,Read/Write,[],2022-04-12 01:10,2022-04-12 02:53
+mtu,dcim.device,MTU,,Integer,False,,5,100,,Loose,Read/Write,[],2022-07-12 11:26,2022-07-12 11:26
+primary,dcim.device,Primary,,Boolean (true/false),False,,7,100,False,Loose,Read/Write,[],2022-07-12 11:33,2022-07-12 11:33
+rack_latitude,dcim.rack,Rack Latitude,,Text,False,,3,100,0.0,Loose,Read/Write,[],2022-07-12 11:22,2022-08-30 05:50
+rack_longitude,dcim.rack,Rack Longitude,,Text,False,,4,100,0.0,Loose,Read/Write,[],2022-07-12 11:23,2022-08-30 05:50
+rack_world_location_offset,dcim.rack,Rack World Location Offset,,Text,False,,8,100,,Loose,Read/Write,[],2022-08-01 20:23,2022-09-12 06:16
+rack_world_rotation_offset,dcim.rack,Rack World Rotation Offset,,Text,False,,9,100,,Loose,Read/Write,[],2022-08-01 20:24,2022-09-12 06:16
+region_latitude,dcim.region,Region Latitude,,Text,False,,10,100,0.0,Loose,Read/Write,[],2022-08-30 05:48,2022-08-30 05:56
+region_longitude,dcim.region,Region Longitude,,Text,False,,11,100,0.0,Loose,Read/Write,[],2022-08-30 05:49,2022-08-30 05:50
