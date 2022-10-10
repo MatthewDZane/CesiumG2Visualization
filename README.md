@@ -19,7 +19,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/MatthewDZane/CesiumNetBoxVisualization">
+  <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">
     <img src="images/CesiumExample.png" alt="CesiumExample" width="80" height="80">
   </a>
 
@@ -28,14 +28,14 @@
   <p align="center">
     A Cesium Earth based NetBox visualization!
     <br />
-    <a href="https://github.com/MatthewDZane/CesiumNetBoxVisualization"><strong>Explore the docs »</strong></a>
+    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/MatthewDZane/CesiumNetBoxVisualization">View Demo</a>
+    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">View Demo</a>
     ·
-    <a href="https://github.com/MatthewDZane/CesiumNetBoxVisualization">Report Bug</a>
+    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">Report Bug</a>
     ·
-    <a href="https://github.com/MatthewDZane/CesiumNetBoxVisualization">Request Feature</a>
+    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">Request Feature</a>
   </p>
 </div>
 
@@ -117,14 +117,14 @@ The Cesium For Unreal Plugin can be found [here](https://www.unrealengine.com/ma
 _Below are instruction on how to setup NetBox for the Cesium NetBox Visualization plugin._
 
 1. Add a Site, Device, and Device Type entry with the name "TBD".
-2. Import the Custom Fields in [netbox_custom fields.csv](https://github.com/MatthewDZane/CesiumNetBoxVisualization/netbox_custom_fields.csv)
+2. Import the Custom Fields in [netbox_custom fields.csv](https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/netbox_custom_fields.csv)
 
 _Below are instruction on how to setup the Cesium NetBox Visualization plugin in an Unreal Engine 5 project._
 
 1. Create Unreal Engine 5 project and ensure that there is a "Plugins" folder.
 2. Clone this Repository into the "Plugins" folder. If the project is already using Git, the plugin can be added as a submodule.
 ```
-git submodule add https://github.com/MatthewDZane/CesiumNetBoxVisualization Plugins/CesiumNetBoxVisualization
+git submodule add https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization Plugins/CesiumNetBoxVisualization
 ```
 4. Clone the [Reztly](https://github.com/MatthewDZane/Reztly) Repository into the "Plugins" folder. 
 If the project is already using Git, the plugin can be added as a submodule.
@@ -162,7 +162,7 @@ Although all of the PlayerControllers, Pawns, and Maps can be used as they are i
   - [ ] Devices
 - [ ] Fix BP_NetBox_Visualization Region Displays
 
-See the [open issues](https://github.com/MatthewDZane/CesiumNetBoxVisualization/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -191,7 +191,7 @@ Don't forget to give the project a star! Thanks again!
 
 Matthew Zane - [@matthewdzane](https://www.linkedin.com/in/matthewdzane/) - MatthewDZane@gmail.com
 
-Project Link: [https://github.com/MatthewDZane/CesiumNetBoxVisualization]https://github.com/MatthewDZane/CesiumNetBoxVisualization)
+Project Link: [https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization](https://github.com/MatthewDZane/CesiumNetBoxVisualization)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -214,13 +214,13 @@ Use this space to list resources you find helpful and would like to give credit 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
-[contributors-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/graphs/contributors
+[contributors-url]: https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
-[forks-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/network/members
+[forks-url]: https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/network/members
 [stars-shield]: https://img.shields.io/github/stars/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
-[stars-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/stargazers
+[stars-url]: https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/stargazers
 [issues-shield]: https://img.shields.io/github/issues/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
-[issues-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/issues
+[issues-url]: https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/matthewdzane
 [product-screenshot]: images/screenshot.png
