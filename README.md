@@ -12,7 +12,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -75,11 +74,13 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-This project is an Unreal Engine 5 Plugin that utilizes[Cesium for Unreal](https://cesium.com/platform/cesium-for-unreal/) to generate and display a 3D globe and street view of a [NetBox Database](https://netbox.dev/). It is possible to use Unreal Engine 4, but this repository has been tested only with Unreal Engine 5.
+This project is an Unreal Engine 5 Plugin that utilizes [Cesium for Unreal](https://cesium.com/platform/cesium-for-unreal/) to generate and display a 3D globe and street view of a [NetBox Database](https://netbox.dev/). It is possible to use Unreal Engine 4, but this repository has been tested only with Unreal Engine 5.
 
 This plugin was originally created to display the G2 Trace Graph from the [Qualcomm AI Research Department](https://www.qualcomm.com/research/artificial-intelligence/ai-research). However, the main purpose has centered on NetBox functionality. Additionally, the Data Utils Trace Graph will used in the event that the G2 Trace Graph in inaccessible.
 
 Currently the Street View is currently in development and does not have much functionality yet.
+
+Please contact [matthewdzane@gmail.com](matthewdzane@gmail.com) for access to the private repository, which contains the source code.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -185,15 +186,6 @@ Don't forget to give the project a star! Thanks again!
 
 
 
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 <!-- CONTACT -->
 ## Contact
 
@@ -221,16 +213,14 @@ Use this space to list resources you find helpful and would like to give credit 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/MatthewDZane/CesiumNetBoxVisualization.svg?style=for-the-badge
-[contributors-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualization/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/MatthewDZane/CesiumNetBoxVisualization.svg?style=for-the-badge
-[forks-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualization/network/members
-[stars-shield]: https://img.shields.io/github/stars/MatthewDZane/CesiumNetBoxVisualization.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/MatthewDZane/CesiumNetBoxVisualization.svg?style=for-the-badge
-[issues-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualization/issues
-[license-shield]: https://img.shields.io/github/license/MatthewDZane/CesiumNetBoxVisualization.svg?style=for-the-badge
-[license-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualization/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
+[contributors-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
+[forks-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/network/members
+[stars-shield]: https://img.shields.io/github/stars/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
+[stars-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/stargazers
+[issues-shield]: https://img.shields.io/github/issues/MatthewDZane/CesiumNetBoxVisualizationPreview.svg?style=for-the-badge
+[issues-url]: https://github.com/MatthewDZane/CesiumNetBoxVisualizationPreview/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/matthewdzane
 [product-screenshot]: images/screenshot.png
