@@ -327,9 +327,9 @@ void ANetBoxVisualizationController::ParseRackData(TArray<FRackStruct> NetboxRac
 
 		Rack->RackLatitude = NetboxRack.Custom_fields.Rack_latitude;
 		Rack->RackLongitude = NetboxRack.Custom_fields.Rack_longitude;
-		Rack->RackWorldLocationOffset.InitFromString(
+		Rack->WorldLocationOffset.InitFromString(
 			NetboxRack.Custom_fields.Rack_world_location_offset);
-		Rack->RackWorldRotationOffset.InitFromString(
+		Rack->WorldRotationOffset.InitFromString(
 			NetboxRack.Custom_fields.Rack_world_rotation_offset);
 
 		Rack->Site = NameToSiteMap[NetboxRack.Site.Name];
