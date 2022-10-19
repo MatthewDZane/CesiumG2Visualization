@@ -317,7 +317,7 @@ void ANetBoxVisualizationController::ParseRackData(TArray<FRackStruct> NetboxRac
 		Rack->Serial = NetboxRack.Serial;
 		Rack->AssetTag = NetboxRack.Asset_tag;
 		Rack->Type = NetboxRack.Type.Value;
-		Rack->Width = NetboxRack.Width.Value;
+		Rack->Width = FCString::Atof(*NetboxRack.Width.Value);
 
 		Rack->OuterWidth = NetboxRack.Outer_width;
 		Rack->OuterDepth = NetboxRack.Outer_depth;
