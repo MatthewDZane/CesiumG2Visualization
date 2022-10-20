@@ -508,10 +508,12 @@ void ANetBoxVisualizationController::OnNetboxRegionsGetResponse(
 
 		FNetboxRegionResponse NetboxRegionResponse =
 			UJsonParser::StringToNetboxRegionResponse(ResponseContentString);
+		AsyncTask(ENamedThreads::GameThread, [this, NetboxRegionResponse]()
+			{
+				ParseRegionData(NetboxRegionResponse.Results);
 
-		ParseRegionData(NetboxRegionResponse.Results);
-
-		RequestNetboxSitesGet();
+				RequestNetboxSitesGet();
+			});
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
@@ -556,9 +558,12 @@ void ANetBoxVisualizationController::OnNetboxSitesGetResponse(FString ResponseCo
 		FNetboxSiteResponse NetboxSiteResponse =
 			UJsonParser::StringToNetboxSiteResponse(ResponseContentString);
 
-		ParseSiteData(NetboxSiteResponse.Results);
+		AsyncTask(ENamedThreads::GameThread, [this, NetboxSiteResponse]()
+			{
+				ParseSiteData(NetboxSiteResponse.Results);
 
-		RequestNetboxLocationsGet();
+				RequestNetboxLocationsGet();
+			});
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
@@ -602,10 +607,12 @@ void ANetBoxVisualizationController::OnNetboxLocationsGetResponse(FString Respon
 
 		FNetboxLocationResponse NetboxLocationResponse =
 			UJsonParser::StringToNetboxLocationResponse(ResponseContentString);
+		AsyncTask(ENamedThreads::GameThread, [this, NetboxLocationResponse]()
+			{
+				ParseLocationData(NetboxLocationResponse.Results);
 
-		ParseLocationData(NetboxLocationResponse.Results);
-
-		RequestNetboxRacksGet();
+				RequestNetboxRacksGet();
+			});
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
@@ -649,10 +656,12 @@ void ANetBoxVisualizationController::OnNetboxRacksGetResponse(FString ResponseCo
 
 		FNetboxRackResponse NetboxRackResponse =
 			UJsonParser::StringToNetboxRackResponse(ResponseContentString);
+		AsyncTask(ENamedThreads::GameThread, [this, NetboxRackResponse]()
+			{
+				ParseRackData(NetboxRackResponse.Results);
 
-		ParseRackData(NetboxRackResponse.Results);
-
-		RequestNetboxDevicesGet();
+				RequestNetboxDevicesGet();
+			});
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
@@ -696,17 +705,23 @@ void ANetBoxVisualizationController::OnNetboxDevicesResponse(FString ResponseCon
 
 		FNetboxDeviceResponse NetboxDeviceResponse =
 			UJsonParser::StringToNetboxDeviceResponse(ResponseContentString);
+		AsyncTask(ENamedThreads::GameThread, [this, NetboxDeviceResponse]()
+			{
+				ParseNetboxDeviceData(NetboxDeviceResponse);
 
-		ParseNetboxDeviceData(NetboxDeviceResponse);
-
-		if (NetboxDeviceResponse.Next == "") {
-			CrossReferenceNodeData();
-		}
-		else {
-			FStringResponseDelegate Delegate;
-			Delegate.BindUFunction(this, FName("OnNetboxDevicesResponse"));
-			UReztly::RequestNetboxGet(NetboxDeviceResponse.Next, NetboxToken, Delegate);
-		}
+				if (NetboxDeviceResponse.Next == "") {
+					AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, 
+						[this, NetboxDeviceResponse]()
+						{
+							CrossReferenceNodeData();
+						});
+				}
+				else {
+					FStringResponseDelegate Delegate;
+					Delegate.BindUFunction(this, FName("OnNetboxDevicesResponse"));
+					UReztly::RequestNetboxGet(NetboxDeviceResponse.Next, NetboxToken, Delegate);
+				}
+			});
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
