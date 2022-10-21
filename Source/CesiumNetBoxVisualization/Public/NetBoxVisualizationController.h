@@ -13,10 +13,12 @@
 #include "Site.h"
 #include "Location.h"
 #include "Rack.h"
+#include "DeviceType.h"
 #include "NetboxSiteResponse.h"
 #include "NetboxLocationResponse.h"
 #include "NetboxRackResponse.h"
 #include "NetboxDeviceResponse.h"
+#include "NetboxDeviceTypeResponse.h"
 #include "TimeStampIDPair.h"
 #include "UE4Response.h"
 
@@ -71,6 +73,8 @@ public:
 		TMap<FString, URack*> NameToRackMap;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TMap<FString, UDevice*> NameToDeviceMap;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TMap<FString, UDeviceType*> ModelToDeviceTypeMap;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		int MaxEntriesPerRequest = 10;
@@ -145,6 +149,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ParseRackData(TArray<FRackStruct> NetboxRacks);
 	UFUNCTION(BlueprintCallable)
+		void ParseDeviceTypeData(TArray<FNetboxDeviceType> DeviceTypes);
+	UFUNCTION(BlueprintCallable)
 		void ParseNodeData(TArray<FG2NodeStruct> SnapshotNodes);
 	UFUNCTION(BlueprintCallable)
 		void ParseLinkData(TArray<FLink> SnapshotLinks);
@@ -213,6 +219,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void OnNetboxDevicesResponse(FString ResponseContentString,
 									 bool bWasSuccessful);
+
+	UFUNCTION(BlueprintCallable)
+		void RequestNetboxDeviceTypesGet();
+	UFUNCTION(BlueprintCallable)
+		void OnNetboxDeviceTypesResponse(FString ResponseContentString,
+										 bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable)
 		void ParseNetboxDeviceData(FNetboxDeviceResponse NetboxResponse);

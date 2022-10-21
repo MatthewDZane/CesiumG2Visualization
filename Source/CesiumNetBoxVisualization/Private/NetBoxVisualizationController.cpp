@@ -342,6 +342,33 @@ void ANetBoxVisualizationController::ParseRackData(TArray<FRackStruct> NetboxRac
 	}
 }
 
+void ANetBoxVisualizationController::ParseDeviceTypeData(TArray<FNetboxDeviceType> DeviceTypes)
+{
+	for (FNetboxDeviceType NetboxDeviceType : DeviceTypes) {
+		UDeviceType* DeviceType = NewObject<UDeviceType>();
+
+		DeviceType->Id = NetboxDeviceType.Id;
+		DeviceType->Url = NetboxDeviceType.Url;
+		DeviceType->Display = NetboxDeviceType.Display;
+		DeviceType->Model = NetboxDeviceType.Model;
+		DeviceType->Slug = NetboxDeviceType.Slug;
+		DeviceType->Part_number = NetboxDeviceType.Part_number;
+		DeviceType->U_height = NetboxDeviceType.U_height;
+		DeviceType->Is_full_depth = NetboxDeviceType.Is_full_depth;
+		DeviceType->Subdevice_role = NetboxDeviceType.Subdevice_role;
+		DeviceType->Airflow = NetboxDeviceType.Airflow;
+		DeviceType->Front_image = NetboxDeviceType.Front_image;
+		DeviceType->Rear_image = NetboxDeviceType.Rear_image;
+		DeviceType->Comments = NetboxDeviceType.Comments;
+		DeviceType->Tags = NetboxDeviceType.Tags;
+		DeviceType->Custom_fields = NetboxDeviceType.Custom_fields;
+		DeviceType->Created = NetboxDeviceType.Created;
+		DeviceType->Last_updated = NetboxDeviceType.Last_updated;
+
+		ModelToDeviceTypeMap.Add(DeviceType->Model, DeviceType);
+	}
+}
+
 void ANetBoxVisualizationController::ParseNodeData(TArray<FG2NodeStruct> SnapshotNodes) {
 	for (FG2NodeStruct Node : SnapshotNodes) {
 		if (Snapshot->IDToNodeMap.Contains(Node.ID))
@@ -660,7 +687,7 @@ void ANetBoxVisualizationController::OnNetboxRacksGetResponse(FString ResponseCo
 			{
 				ParseRackData(NetboxRackResponse.Results);
 
-				RequestNetboxDevicesGet();
+				RequestNetboxDeviceTypesGet();
 			});
 	}
 	else {
@@ -686,6 +713,36 @@ void ANetBoxVisualizationController::OnNetboxRackPatchResponse(FString ResponseC
 	}
 	UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 		*ResponseContentString);
+}
+
+void ANetBoxVisualizationController::RequestNetboxDeviceTypesGet()
+{
+	FStringResponseDelegate Delegate;
+	Delegate.BindUFunction(this, FName("OnNetboxDeviceTypesResponse"));
+	UReztly::RequestNetboxDeviceTypesGet(NetboxURL, NetboxToken, Delegate);
+}
+
+void ANetBoxVisualizationController::OnNetboxDeviceTypesResponse(FString ResponseContentString,
+	bool bWasSuccessful)
+{
+	if (bWasSuccessful) {
+		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
+		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
+			*ResponseContentString);
+
+		FNetboxDeviceTypeResponse NetboxDeviceTypeResponse =
+			UJsonParser::StringToNetboxDeviceTypeResponse(ResponseContentString);
+
+		AsyncTask(ENamedThreads::GameThread, [this, NetboxDeviceTypeResponse]()
+			{
+				ParseDeviceTypeData(NetboxDeviceTypeResponse.Results);
+
+				RequestNetboxDevicesGet();
+			});
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
+	}
 }
 
 void ANetBoxVisualizationController::RequestNetboxDevicesGet()
@@ -738,6 +795,7 @@ void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse
 		Device->Display = NetboxDevice.Display;
 		Device->Name = NetboxDevice.Name;
 		Device->Info = NetboxDevice.Custom_fields.Info;
+		Device->Position = NetboxDevice.Position;
 
 		TArray<FString> IPAddressStringParts;
 		NetboxDevice.Primary_ip.Address.ParseIntoArray(IPAddressStringParts, TEXT("/"), true);
@@ -755,6 +813,8 @@ void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse
 		if (!NetboxDevice.Rack.Name.IsEmpty()) {
 			Device->Rack = NameToRackMap[NetboxDevice.Rack.Name];
 		}
+
+		Device->DeviceType = ModelToDeviceTypeMap[NetboxDevice.Device_Type.Model];
 
 		NameToDeviceMap.Add(Device->Name, Device);
 	}
