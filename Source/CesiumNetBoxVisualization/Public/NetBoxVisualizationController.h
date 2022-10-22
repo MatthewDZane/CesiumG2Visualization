@@ -244,8 +244,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicePatch(FNetboxDevice Device);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxPatchDeviceResponse(FString ResponseContentString,
+		void OnNetboxPatchDevicesResponse(FString ResponseContentString,
 										 bool bWasSuccessful);
+	UFUNCTION(BlueprintCallable)
+		void OnNetboxPatchDeviceResponse(FString ResponseContentString,
+			bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable)
 		bool IsValidLatLong(float Latitude, float Longitude);

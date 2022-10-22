@@ -360,7 +360,6 @@ void ANetBoxVisualizationController::ParseDeviceTypeData(TArray<FNetboxDeviceTyp
 		DeviceType->Front_image = NetboxDeviceType.Front_image;
 		DeviceType->Rear_image = NetboxDeviceType.Rear_image;
 		DeviceType->Comments = NetboxDeviceType.Comments;
-		DeviceType->Tags = NetboxDeviceType.Tags;
 		DeviceType->Custom_fields = NetboxDeviceType.Custom_fields;
 		DeviceType->Created = NetboxDeviceType.Created;
 		DeviceType->Last_updated = NetboxDeviceType.Last_updated;
@@ -999,7 +998,7 @@ void ANetBoxVisualizationController::RequestNetboxDevicesPatch()
 	UE_LOG(LogTemp, Log, TEXT("Device Patch Request %d/%d"), CurrentUpdateDevice, NumUpdateBatches);
 
 	FStringResponseDelegate Delegate;
-	Delegate.BindUFunction(this, FName("OnNetboxPatchDeviceResponse"));
+	Delegate.BindUFunction(this, FName("OnNetboxPatchDevicesResponse"));
 	UReztly::RequestNetboxDevicesPatch(DeviceBatch, NetboxURL, NetboxToken, Delegate);
 }
 
@@ -1014,6 +1013,19 @@ void ANetBoxVisualizationController::RequestNetboxDevicePatch(FNetboxDevice Devi
 }
 
 void ANetBoxVisualizationController::OnNetboxPatchDeviceResponse(FString ResponseContentString,
+	bool bWasSuccessful)
+{
+	if (bWasSuccessful) {
+		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
+	}
+	UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
+		*ResponseContentString);
+}
+
+void ANetBoxVisualizationController::OnNetboxPatchDevicesResponse(FString ResponseContentString,
 	bool bWasSuccessful)
 {
 	if (bWasSuccessful) {
