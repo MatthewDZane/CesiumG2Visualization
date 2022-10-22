@@ -787,7 +787,7 @@ void ANetBoxVisualizationController::OnNetboxDevicesResponse(FString ResponseCon
 
 void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse NetboxResponse)
 {
-	for (FDeviceStruct NetboxDevice : NetboxResponse.Results)
+	for (FNetboxDevice NetboxDevice : NetboxResponse.Results)
 	{
 		UDevice* Device = NewObject<UDevice>();
 		Device->ID = NetboxDevice.Id;
@@ -796,6 +796,9 @@ void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse
 		Device->Name = NetboxDevice.Name;
 		Device->Info = NetboxDevice.Custom_fields.Info;
 		Device->Position = NetboxDevice.Position;
+
+		Device->WorldLocationOffset.InitFromString(NetboxDevice.Custom_fields.Device_world_location_offset);
+		Device->WorldRotationOffset.InitFromString(NetboxDevice.Custom_fields.Device_world_rotation_offset);
 
 		TArray<FString> IPAddressStringParts;
 		NetboxDevice.Primary_ip.Address.ParseIntoArray(IPAddressStringParts, TEXT("/"), true);
@@ -926,7 +929,7 @@ bool ANetBoxVisualizationController::CompareNodeToNetboxDeviceData(UG2Node* Node
 
 void ANetBoxVisualizationController::RequestNetboxDevicesPost()
 {
-	TArray<FDeviceStruct> DeviceBatch;
+	TArray<FNetboxDevice> DeviceBatch;
 	for (int i = 0; i < FGenericPlatformMath::Min(MaxEntriesPerRequest, NewDevices.Num()); i++)
 	{
 		DeviceBatch.Add(NewDevices[i]->ToStruct());
@@ -949,9 +952,9 @@ void ANetBoxVisualizationController::OnNetboxPostDeviceResponse(FString Response
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		TArray<FDeviceStruct> DeviceResults =
+		TArray<FNetboxDevice> DeviceResults =
 			UJsonParser::StringToDevices(ResponseContentString);
-		for (FDeviceStruct DeviceStruct : DeviceResults) {
+		for (FNetboxDevice DeviceStruct : DeviceResults) {
 			UDevice* Device = NameToDeviceMap[DeviceStruct.Name];
 			Device->ID = DeviceStruct.Id;
 			Device->Url = DeviceStruct.Url;
@@ -987,7 +990,7 @@ void ANetBoxVisualizationController::OnNetboxPostDeviceResponse(FString Response
 
 void ANetBoxVisualizationController::RequestNetboxDevicesPatch()
 {
-	TArray<FDeviceStruct> DeviceBatch;
+	TArray<FNetboxDevice> DeviceBatch;
 	for (int i = 0; i < FGenericPlatformMath::Min(MaxEntriesPerRequest, DevicesToUpdate.Num()); i++)
 	{
 		DeviceBatch.Add(DevicesToUpdate[i]->ToStruct());
@@ -1000,14 +1003,13 @@ void ANetBoxVisualizationController::RequestNetboxDevicesPatch()
 	UReztly::RequestNetboxDevicesPatch(DeviceBatch, NetboxURL, NetboxToken, Delegate);
 }
 
-void ANetBoxVisualizationController::RequestNetboxDevicePatch(UDevice* Device)
+void ANetBoxVisualizationController::RequestNetboxDevicePatch(FNetboxDevice Device)
 {
-	DevicesToUpdate.Add(Device);
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPatchDeviceResponse"));
 
-	TArray<FDeviceStruct> Devices;
-	Devices.Add(Device->ToStruct());
+	TArray<FNetboxDevice> Devices;
+	Devices.Add(Device);
 	UReztly::RequestNetboxDevicesPatch(Devices, NetboxURL, NetboxToken, Delegate);
 }
 
@@ -1019,7 +1021,7 @@ void ANetBoxVisualizationController::OnNetboxPatchDeviceResponse(FString Respons
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		TArray<FDeviceStruct> DeviceResults =
+		TArray<FNetboxDevice> DeviceResults =
 			UJsonParser::StringToDevices(ResponseContentString);
 	}
 	else {

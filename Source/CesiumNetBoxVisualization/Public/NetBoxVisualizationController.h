@@ -242,7 +242,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicesPatch();
 	UFUNCTION(BlueprintCallable)
-		void RequestNetboxDevicePatch(UDevice* Device);
+		void RequestNetboxDevicePatch(FNetboxDevice Device);
 	UFUNCTION(BlueprintCallable)
 		void OnNetboxPatchDeviceResponse(FString ResponseContentString,
 										 bool bWasSuccessful);
