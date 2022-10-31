@@ -871,6 +871,8 @@ void ANetBoxVisualizationController::CrossReferenceNodeData() {
 			NewDevice->MTU = Node->MTU;
 			NewDevice->Primary = Node->Primary;
 
+			NewDevice->DeviceType = ModelToDeviceTypeMap["TBD"];
+
 			Node->Device = NewDevice;
 
 			NewDevices.Add(NewDevice);
