@@ -126,7 +126,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestLatestSnapshot();
 	UFUNCTION(BlueprintCallable)
-		void RequestSnapshot(int SnapshotID);
+		void RequestSnapshot(int SnapshotID, int TimeStamp);
 	UFUNCTION(BlueprintCallable)
 		void OnSnapshotResponse(FString ResponseContentString,
 								bool bWasSuccessful);
@@ -250,6 +250,8 @@ public:
 		void OnNetboxPatchDeviceResponse(FString ResponseContentString,
 			bool bWasSuccessful);
 
+	UFUNCTION(BlueprintCallable)
+		bool SnapshotAvailable(int SnapshotID);
 	UFUNCTION(BlueprintCallable)
 		bool IsValidLatLong(float Latitude, float Longitude);
 	UFUNCTION(BlueprintCallable)

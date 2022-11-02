@@ -77,7 +77,15 @@ void ANetBoxVisualizationController::OnSnapshotRangeResponse(FString ResponseCon
 
 		AvailableSnapshots = UJsonParser::StringToAvailableSnapshots(ResponseContentString);
 
-		RequestLatestSnapshot();
+		if (Snapshot->ID == -1) {
+			RequestLatestSnapshot();
+		}
+		else if (SnapshotAvailable(Snapshot->ID)) {
+			RequestSnapshot(Snapshot->ID, Snapshot->TimeStamp);
+		}
+		else {
+			RequestLatestSnapshot();
+		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Snapshot Range Request Unsuccessful"));
@@ -92,13 +100,17 @@ void ANetBoxVisualizationController::RequestLatestSnapshot() {
 			}
 			else {
 				int SnapshotID = AvailableSnapshots.Last(0).ID;
+				int TimeStamp = AvailableSnapshots.Last(0).TimeStamp;
 
-				RequestSnapshot(SnapshotID);
+				RequestSnapshot(SnapshotID, TimeStamp);
 			}
 		});
 }
 
-void ANetBoxVisualizationController::RequestSnapshot(int SnapshotID) {
+void ANetBoxVisualizationController::RequestSnapshot(int SnapshotID, int TimeStamp) {
+	Snapshot->ID = SnapshotID;
+	Snapshot->TimeStamp = TimeStamp;
+
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnSnapshotResponse"));
 	UReztly::RequestSnapshot(SnapshotID, G2APIURL, G2Token, Delegate);
@@ -119,7 +131,15 @@ void ANetBoxVisualizationController::OnSnapshotResponse(FString ResponseContentS
 		}
 		else
 		{
-			AvailableSnapshots.RemoveAt(AvailableSnapshots.Num() - 1);
+			// Remove TimeStampIDPair from list of Available Snapshots
+			for (int i = AvailableSnapshots.Num() - 1; i >= 0; i--) {
+				FTimeStampIDPair TimeStampIDPair = AvailableSnapshots[i];
+				if (Snapshot->ID == TimeStampIDPair.ID) {
+					AvailableSnapshots.RemoveAt(i);
+					break;
+				}
+			}
+			
 			RequestLatestSnapshot();
 		}
 	}
@@ -1056,6 +1076,16 @@ void ANetBoxVisualizationController::OnNetboxPatchDevicesResponse(FString Respon
 	else {
 		RequestNetboxDevicesPatch();
 	}
+}
+
+bool ANetBoxVisualizationController::SnapshotAvailable(int SnapshotID) {
+	for (FTimeStampIDPair TimeStampIDPair : AvailableSnapshots) {
+		if (SnapshotID == TimeStampIDPair.ID) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 #include "Misc/Char.h"

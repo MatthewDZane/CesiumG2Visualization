@@ -63,7 +63,7 @@ public:
 		TArray<FFlow> Flows;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int ID;
+		int ID = -1;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		int TimeStamp;
 
