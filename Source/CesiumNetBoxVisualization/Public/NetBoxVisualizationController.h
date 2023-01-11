@@ -47,6 +47,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "REST Request")
 		FString G2APIURL;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "REST Request")
+		FString G2Token;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "REST Request")
 		FString UE4NautilusDataUtilsURL;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "REST Request")
 		FString NetboxURL;
@@ -84,8 +86,6 @@ private:
 
 	FHttpModule* Http;
 
-	FString G2Token;
-
 	TArray<FTimeStampIDPair> AvailableSnapshots;
 
 	TArray<UDevice*> NewDevices;
@@ -104,6 +104,16 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnSnapshotUpdate();
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void MakeClientsRequestSnapshot(
+			const FString& ServerG2Token,
+			int SnapshotID,
+			int TimeStamp
+		);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void MakeClientsRequestUE4DataUtilsData();
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -112,10 +122,14 @@ public:
 		UG2Snapshot* GetSnapshot();
 
 	UFUNCTION(BlueprintCallable)
+		void RequestVisualizationData();
+
+	UFUNCTION(BlueprintCallable)
 		void RequestBearerToken();
 	UFUNCTION(BlueprintCallable)
 		void OnBearerTokenResponse(FString ResponseContentString,
 			bool bWasSuccessful);
+
 
 	UFUNCTION(BlueprintCallable)
 		void RequestSnapshotRange();

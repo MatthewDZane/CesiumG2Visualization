@@ -6,8 +6,7 @@
 #include "ReztlyLibrary.h"
 
 // Sets default values
-ANetBoxVisualizationController::ANetBoxVisualizationController()
-{
+ANetBoxVisualizationController::ANetBoxVisualizationController() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 }
@@ -17,36 +16,40 @@ ANetBoxVisualizationController::~ANetBoxVisualizationController() {
 }
 
 // Called when the game starts or when spawned
-void ANetBoxVisualizationController::BeginPlay()
-{
+void ANetBoxVisualizationController::BeginPlay() {
 	Super::BeginPlay();
+
+	Snapshot = NewObject<UG2Snapshot>();
 }
 
 // Called every frame
-void ANetBoxVisualizationController::Tick(float DeltaTime)
-{
+void ANetBoxVisualizationController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-UG2Snapshot* ANetBoxVisualizationController::GetSnapshot()
-{
+UG2Snapshot* ANetBoxVisualizationController::GetSnapshot() {
 	return Snapshot;
 }
 
-void ANetBoxVisualizationController::RequestBearerToken()
-{
-	if (G2Enabled) {
-		FStringResponseDelegate Delegate;
-		Delegate.BindUFunction(this, FName("OnBearerTokenResponse"));
-		UReztly::RequestBearerToken(G2Username, G2Password, G2APIURL, Delegate);
-	}
-	else {
-		RequestUE4DataUtilsData();
-	}
+void ANetBoxVisualizationController::RequestVisualizationData() {
+	G2Enabled ?
+		RequestBearerToken() :
+		AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				MakeClientsRequestUE4DataUtilsData();
+			});
 }
 
-void ANetBoxVisualizationController::OnBearerTokenResponse(FString ResponseContentString,
-	bool bWasSuccessful) {
+void ANetBoxVisualizationController::RequestBearerToken() {
+	FStringResponseDelegate Delegate;
+	Delegate.BindUFunction(this, FName("OnBearerTokenResponse"));
+	UReztly::RequestBearerToken(G2Username, G2Password, G2APIURL, Delegate);
+}
+
+void ANetBoxVisualizationController::OnBearerTokenResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Login Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
@@ -68,14 +71,18 @@ void ANetBoxVisualizationController::RequestSnapshotRange()
 	UReztly::RequestSnapshotRange(G2APIURL, G2Token, Delegate);
 }
 
-void ANetBoxVisualizationController::OnSnapshotRangeResponse(FString ResponseContentString,
-	bool bWasSuccessful) {
+void ANetBoxVisualizationController::OnSnapshotRangeResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Snapshot Range Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		AvailableSnapshots = UJsonParser::StringToAvailableSnapshots(ResponseContentString);
+		AvailableSnapshots = UJsonParser::StringToAvailableSnapshots(
+			ResponseContentString
+		);
 
 		if (Snapshot->ID == -1) {
 			RequestLatestSnapshot();
@@ -127,6 +134,17 @@ void ANetBoxVisualizationController::OnSnapshotResponse(FString ResponseContentS
 			UJsonParser::StringToG2SnapshotResponse(ResponseContentString);
 		if (ResponseSnapshot.Data.Num_snapshots != 0)
 		{
+			if (HasAuthority()) {
+				AsyncTask(ENamedThreads::GameThread, [this]()
+					{
+						MakeClientsRequestSnapshot(
+							G2Token, 
+							Snapshot->ID, 
+							Snapshot->TimeStamp
+						);
+					});
+			}
+
 			ParseG2Snapshot(ResponseSnapshot);
 		}
 		else
