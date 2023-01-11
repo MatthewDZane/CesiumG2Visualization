@@ -127,8 +127,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestBearerToken();
 	UFUNCTION(BlueprintCallable)
-		void OnBearerTokenResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnBearerTokenResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 
 	UFUNCTION(BlueprintCallable)
@@ -142,8 +144,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestSnapshot(int SnapshotID, int TimeStamp);
 	UFUNCTION(BlueprintCallable)
-		void OnSnapshotResponse(FString ResponseContentString,
-								bool bWasSuccessful);
+		void OnSnapshotResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestUE4DataUtilsData();
@@ -177,68 +181,91 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ParseNodeInfo(FString Info, FString& IPAddress, float& MTU);
 	UFUNCTION(BlueprintCallable)
-		void ReplaceFlowLinkNodeIDs(TArray<FFlowLink>& FlowLinks,
-			UG2Node* StartNode, UG2Node* EndNode);
+		void ReplaceFlowLinkNodeIDs(
+			TArray<FFlowLink>& FlowLinks,
+			UG2Node* StartNode, 
+			UG2Node* EndNode
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxRegionsGet();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxRegionsGetResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxRegionsGetResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxRegionPatch(FRegionStruct Region);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxRegionPatchResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxRegionPatchResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxSitesGet();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxSitesGetResponse(FString ResponseContentString,
-									  bool bWasSuccessful);
+		void OnNetboxSitesGetResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxSitePatch(FSiteStruct Site);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxSitePatchResponse(FString ResponseContentString,
-									   bool bWasSuccessful);
+		void OnNetboxSitePatchResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxLocationsGet();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxLocationsGetResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxLocationsGetResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxLocationPatch(FLocationStruct Rack);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxLocationPatchResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxLocationPatchResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxRacksGet();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxRacksGetResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxRacksGetResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxRackPatch(FRackStruct Rack);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxRackPatchResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxRackPatchResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicesGet();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxDevicesResponse(FString ResponseContentString,
-									 bool bWasSuccessful);
+		void OnNetboxDevicesResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDeviceTypesGet();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxDeviceTypesResponse(FString ResponseContentString,
-										 bool bWasSuccessful);
+		void OnNetboxDeviceTypesResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void ParseNetboxDeviceData(FNetboxDeviceResponse NetboxResponse);
@@ -250,19 +277,25 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicesPost();
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxPostDeviceResponse(FString ResponseContentString,
-										bool bWasSuccessful);
+		void OnNetboxPostDeviceResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicesPatch();
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicePatch(FNetboxDevice Device);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxPatchDevicesResponse(FString ResponseContentString,
-										 bool bWasSuccessful);
+		void OnNetboxPatchDevicesResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 	UFUNCTION(BlueprintCallable)
-		void OnNetboxPatchDeviceResponse(FString ResponseContentString,
-			bool bWasSuccessful);
+		void OnNetboxPatchDeviceResponse(
+			FString ResponseContentString,
+			bool bWasSuccessful
+		);
 
 	UFUNCTION(BlueprintCallable)
 		bool SnapshotAvailable(int SnapshotID);
