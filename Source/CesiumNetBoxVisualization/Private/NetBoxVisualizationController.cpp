@@ -880,8 +880,18 @@ void ANetBoxVisualizationController::CrossReferenceNodeData() {
 
 			USite* Site = Node->Device->Site;
 
-			if (!Site->Name.Equals("TBD") && !CompareNodeToNetboxDeviceData(Node))
+			if (!Site->Name.Equals("TBD"))
 			{
+				if (Node->MTU == 0)
+				{
+					Node->MTU = Node->Device->MTU;
+				}
+
+				if (!Node->Device->IP.Equals(""))
+				{
+					Node->IP = Node->Device->IP;
+				}
+
 				if (!IsValidLatLong(Node->Latitude, Node->Longitude))
 				{
 					Node->Latitude = Site->Latitude;
@@ -897,8 +907,6 @@ void ANetBoxVisualizationController::CrossReferenceNodeData() {
 						RequestNetboxSitePatch(Site->ToStruct());
 					}
 				}
-
-				DevicesToUpdate.Add(Node->Device);
 			}
 		}
 		else if (!IsHop(Node->Name))
