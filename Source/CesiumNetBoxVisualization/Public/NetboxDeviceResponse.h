@@ -257,7 +257,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		FNetboxStatus Status;
 	UPROPERTY(BlueprintReadWrite)
-		FString Airflow;
+		FNetboxStatus Airflow;
 	UPROPERTY(BlueprintReadWrite)
 		FPrimaryIp Primary_ip;
 	UPROPERTY(BlueprintReadWrite)
