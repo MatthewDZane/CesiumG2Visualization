@@ -3,11 +3,11 @@
 
 #include "NetBoxVisualizationController.h"
 #include "JsonParser.h"
-#include "ReztlyLibrary.h"
+#include "CesiumNetBoxVisualizationRequestLibrary.h"
+#include "ReztlyFunctionLibrary.h"
 
 // Sets default values
 ANetBoxVisualizationController::ANetBoxVisualizationController() {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 }
 
@@ -43,7 +43,13 @@ void ANetBoxVisualizationController::RequestVisualizationData() {
 void ANetBoxVisualizationController::RequestBearerToken() {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnBearerTokenResponse"));
-	UReztly::RequestBearerToken(G2Username, G2Password, G2APIURL, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestBearerToken(
+		G2Username, 
+		G2Password, 
+		G2APIURL, 
+		Delegate
+	);
 }
 
 void ANetBoxVisualizationController::OnBearerTokenResponse(
@@ -54,21 +60,33 @@ void ANetBoxVisualizationController::OnBearerTokenResponse(
 		UE_LOG(LogTemp, Log, TEXT("Login Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
+		UReztlyJsonObject* JsonObject = 
+			UReztlyFunctionLibrary::StringToJson(ResponseContentString);
+		
+		if (JsonObject != nullptr) {
+			bool TokenFound;
+			JsonObject->GetFieldValueAsString("token", G2Token, TokenFound);
 
-		G2Token = UJsonParser::ParseBearerToken(ResponseContentString);
+			if (TokenFound) {
+				RequestSnapshotRange();
+				return;
+			}
+		}
+	}
 
-		RequestSnapshotRange();
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Login Unsuccessful"));
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Login Unsuccessful"));
 }
 
 void ANetBoxVisualizationController::RequestSnapshotRange()
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnSnapshotRangeResponse"));
-	UReztly::RequestSnapshotRange(G2APIURL, G2Token, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshotRange(
+		G2APIURL, 
+		G2Token, 
+		Delegate
+	);
 }
 
 void ANetBoxVisualizationController::OnSnapshotRangeResponse(
@@ -80,9 +98,44 @@ void ANetBoxVisualizationController::OnSnapshotRangeResponse(
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		AvailableSnapshots = UJsonParser::StringToAvailableSnapshots(
-			ResponseContentString
-		);
+		FString TempJsonString = ResponseContentString.TrimStartAndEnd();
+		if (TempJsonString.Len() > 4 &&
+			TempJsonString[0] == '[' &&
+			TempJsonString[1] == '[' &&
+			TempJsonString[TempJsonString.Len() - 1] == ']' &&
+			TempJsonString[TempJsonString.Len() - 2] == ']'
+			) {
+			// Remove starting and ending brackets
+			TempJsonString = TempJsonString.RightChop(2);
+			TempJsonString = TempJsonString.LeftChop(2);
+
+
+			// String has "...],[...],[..." format
+			TArray<FString> AvailableSnapshotsString;
+			TempJsonString.ParseIntoArray(
+				AvailableSnapshotsString,
+				TEXT("],[")
+			);
+
+			for (FString AvailableSnapshotString : AvailableSnapshotsString) {
+				// String has "...,...,..." format
+				TArray<FString> AvailableSnapshotData;
+				AvailableSnapshotString.ParseIntoArray(
+					AvailableSnapshotData,
+					TEXT(",")
+				);
+
+				if (AvailableSnapshotData.Num() == 2) {
+					FTimeStampIDPair AvailableSnapshot;
+					AvailableSnapshot.TimeStamp = 
+						FCString::Atoi(*AvailableSnapshotData[0]);
+					AvailableSnapshot.ID = 
+						(int)FCString::Atof(*AvailableSnapshotData[1]);
+
+					AvailableSnapshots.Add(AvailableSnapshot);
+				}
+			}
+		}
 
 		if (Snapshot->ID == -1) {
 			RequestLatestSnapshot();
@@ -100,40 +153,51 @@ void ANetBoxVisualizationController::OnSnapshotRangeResponse(
 }
 
 void ANetBoxVisualizationController::RequestLatestSnapshot() {
-	AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
-		{
-			if (AvailableSnapshots.Num() == 0) {
-				RequestUE4DataUtilsData();
-			}
-			else {
-				int SnapshotID = AvailableSnapshots.Last(0).ID;
-				int TimeStamp = AvailableSnapshots.Last(0).TimeStamp;
+		if (AvailableSnapshots.Num() == 0) {
+			RequestUE4DataUtilsData();
+		}
+		else {
+			int SnapshotID = AvailableSnapshots.Last(0).ID;
+			int TimeStamp = AvailableSnapshots.Last(0).TimeStamp;
 
-				RequestSnapshot(SnapshotID, TimeStamp);
-			}
-		});
+			RequestSnapshot(SnapshotID, TimeStamp);
+		}
 }
 
-void ANetBoxVisualizationController::RequestSnapshot(int SnapshotID, int TimeStamp) {
+void ANetBoxVisualizationController::RequestSnapshot(
+	int SnapshotID, 
+	int TimeStamp
+) {
 	Snapshot->ID = SnapshotID;
 	Snapshot->TimeStamp = TimeStamp;
 
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnSnapshotResponse"));
-	UReztly::RequestSnapshot(SnapshotID, G2APIURL, G2Token, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshot(
+		SnapshotID, 
+		G2APIURL, 
+		G2Token, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnSnapshotResponse(FString ResponseContentString,
-	bool bWasSuccessful) {
+void ANetBoxVisualizationController::OnSnapshotResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Snapshot Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FG2SnapshotResponse ResponseSnapshot =
-			UJsonParser::StringToG2SnapshotResponse(ResponseContentString);
-		if (ResponseSnapshot.Data.Num_snapshots != 0)
-		{
+		FG2SnapshotResponse ResponseSnapshot;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString, 
+				&ResponseSnapshot
+			) && 
+			ResponseSnapshot.Data.Num_snapshots != 0
+		) {
 			if (HasAuthority()) {
 				AsyncTask(ENamedThreads::GameThread, [this]()
 					{
@@ -171,35 +235,185 @@ void ANetBoxVisualizationController::OnSnapshotResponse(FString ResponseContentS
 void ANetBoxVisualizationController::RequestUE4DataUtilsData() {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnUE4DataUtilsResponse"));
-	UReztly::RequestUE4NautilusData(UE4NautilusDataUtilsURL, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestUE4NautilusData(
+		UE4NautilusDataUtilsURL, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnUE4DataUtilsResponse(FString ResponseContentString,
-	bool bWasSuccessful) {
+void ANetBoxVisualizationController::OnUE4DataUtilsResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Snapshot Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FUE4Response ResponseSnapshot =
-			UJsonParser::StringToUE4Response(ResponseContentString);
-		if (ResponseSnapshot.Nodes.Num() != 0)
+		EReztlyResult ExecResult;
+		UReztlyJsonObject* JsonObject = UReztlyFunctionLibrary::StringToJson(ExecResult, ResponseContentString);
+		if (ExecResult == EReztlyResult::VALID)
 		{
-			ParseUE4Data(ResponseSnapshot);
+			FUE4Response ResponseSnapshot;
+
+			// Parse Nodes Field
+			TArray<UReztlyJsonValue*> NodeJsonValues;
+			bool NodesFieldFound;
+			JsonObject->GetFieldValueAsArray("nodes", NodeJsonValues, NodesFieldFound);
+
+			if (NodesFieldFound) {
+				for (UReztlyJsonValue* NodeJsonValue : NodeJsonValues) {
+					UReztlyJsonObject* NodeJsonObject;
+					bool NodeJsonObjectSuccess;
+					NodeJsonValue->TryAsJsonObject(NodeJsonObject, NodeJsonObjectSuccess);
+
+					if (NodeJsonObjectSuccess) {
+						FUE4Node NodeStruct;
+
+						// Parse Paths Field
+						TArray<UReztlyJsonValue*> PathJsonValues;
+						bool PathsFieldFound;
+						NodeJsonObject->GetFieldValueAsArray("paths", PathJsonValues, PathsFieldFound);
+
+						if (PathsFieldFound) {
+							for (UReztlyJsonValue* PathJsonValue : PathJsonValues) {
+								TArray<UReztlyJsonValue*> ValueJsonValues;
+								bool ValueJsonValuesSuccess;
+								PathJsonValue->TryAsArray(ValueJsonValues, ValueJsonValuesSuccess);
+
+								if (ValueJsonValuesSuccess) {
+									FPath PathStruct;
+
+									for (UReztlyJsonValue* ValueJsonValue : ValueJsonValues) {
+										FString ValueString;
+										bool ValueStringSuccess;
+										ValueJsonValue->TryAsString(ValueString, ValueStringSuccess);
+
+										if (ValueStringSuccess) {
+											PathStruct.Values.Add(ValueString);
+										}
+									}
+
+									NodeStruct.Paths.Add(PathStruct);
+								}
+							}
+						}
+
+						// Parse Hostname Field
+						bool HostnameFieldFound;
+						NodeJsonObject->GetFieldValueAsString("hostname", NodeStruct.Hostname, HostnameFieldFound);
+
+						// Parse Ip Field
+						bool IpFieldFound;
+						NodeJsonObject->GetFieldValueAsString("ip", NodeStruct.Ip, IpFieldFound);
+
+						// Parse Latitude Field
+						bool LatitudeFieldFound;
+						NodeJsonObject->GetFieldValueAsFloat("latitude", NodeStruct.Latitude, LatitudeFieldFound);
+
+						// Parse Hostname Field
+						bool LongitudeFieldFound;
+						NodeJsonObject->GetFieldValueAsFloat("longitude", NodeStruct.Longitude, LongitudeFieldFound);
+
+						// Parse Hostname Field
+						bool PrimaryFieldFound;
+						NodeJsonObject->GetFieldValueAsBool("primary", NodeStruct.Primary, PrimaryFieldFound);
+
+						ResponseSnapshot.Nodes.Add(NodeStruct);
+					}
+				}
+			}
+
+			// Parse Edges Field
+			TArray<UReztlyJsonValue*> EdgeJsonValues;
+			bool EdgesFieldFound;
+			JsonObject->GetFieldValueAsArray("edges", EdgeJsonValues, EdgesFieldFound);
+
+			if (EdgesFieldFound) {
+				for (UReztlyJsonValue* EdgeJsonValue : EdgeJsonValues) {
+					UReztlyJsonObject* EdgeJsonObject;
+					bool EdgeJsonObjectSuccess;
+					EdgeJsonValue->TryAsJsonObject(EdgeJsonObject, EdgeJsonObjectSuccess);
+
+					if (EdgeJsonObjectSuccess) {
+						FUE4Edge EdgeStruct;
+
+						// Parse Source Field
+						bool SourceFieldFound;
+						EdgeJsonObject->GetFieldValueAsInt("source", EdgeStruct.Source, SourceFieldFound);
+
+						// Parse Target Field
+						bool TargetFieldFound;
+						EdgeJsonObject->GetFieldValueAsInt("target", EdgeStruct.Target, TargetFieldFound);
+
+						// Parse Mtu Field
+						bool MtuFieldFound;
+						EdgeJsonObject->GetFieldValueAsInt("mtu", EdgeStruct.Mtu, MtuFieldFound);
+
+						// Parse Latency Field
+						bool LatencyFieldFound;
+						EdgeJsonObject->GetFieldValueAsFloat("latency", EdgeStruct.Latency, LatencyFieldFound);
+
+						// Parse Paths Field
+						TArray<UReztlyJsonValue*> PathJsonValues;
+						bool PathsFieldFound;
+						EdgeJsonObject->GetFieldValueAsArray("paths", PathJsonValues, PathsFieldFound);
+
+						if (PathsFieldFound) {
+							for (UReztlyJsonValue* PathJsonValue : PathJsonValues) {
+								TArray<UReztlyJsonValue*> ValueJsonValues;
+								bool ValueJsonValuesSuccess;
+								PathJsonValue->TryAsArray(ValueJsonValues, ValueJsonValuesSuccess);
+
+								if (ValueJsonValuesSuccess) {
+									FPath PathStruct;
+
+									for (UReztlyJsonValue* ValueJsonValue : ValueJsonValues) {
+										FString ValueString;
+										bool ValueStringSuccess;
+										ValueJsonValue->TryAsString(ValueString, ValueStringSuccess);
+
+										if (ValueStringSuccess) {
+											PathStruct.Values.Add(ValueString);
+										}
+									}
+
+									EdgeStruct.Paths.Add(PathStruct);
+								}
+							}
+						}
+
+						ResponseSnapshot.Edges.Add(EdgeStruct);
+					}
+				}
+			}
+
+			if (ResponseSnapshot.Nodes.Num() != 0)
+			{
+				ParseUE4Data(ResponseSnapshot);
+				return;
+			}
+			else {
+				UE_LOG(
+					LogTemp,
+					Warning,
+					TEXT("No Data recieved from UE4 Data Utils")
+				);
+			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No Data recieved from UE4 Data Utils"));
-			RequestNetboxRegionsGet();
+		else {
+			UE_LOG(LogJson, Warning, TEXT("OnUE4DataUtilsResponse - Unable to parse. json=[%s]"), *ResponseContentString);
 		}
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("UE4 Data Utils Request Unsuccessful"));
-		RequestNetboxRegionsGet();
+		UE_LOG(LogTemp, Warning, TEXT("UE4 Data Utils Request Unsuccessful"));		
 	}
+
+	RequestNetboxRegionsGet();
 }
 
-void ANetBoxVisualizationController::ParseUE4Data(FUE4Response UE4Response) {
+void ANetBoxVisualizationController::ParseUE4Data(const FUE4Response& UE4Response) {
 	// Create G2Node objects
 	for (FUE4Node Node : UE4Response.Nodes) {
 		UG2Node* G2Node = NewObject<UG2Node>();
@@ -217,6 +431,7 @@ void ANetBoxVisualizationController::ParseUE4Data(FUE4Response UE4Response) {
 		G2Node->Primary = Node.Primary;
 
 		Snapshot->IDToNodeMap.Add(G2Node->ID, G2Node);
+		Snapshot->IPToNodeMap.Add(G2Node->IP, G2Node);
 	}
 	UE_LOG(LogTemp, Log, TEXT("Finished Parsing UE4 Node Data."));
 
@@ -225,14 +440,22 @@ void ANetBoxVisualizationController::ParseUE4Data(FUE4Response UE4Response) {
 		for (FPath Path : Node.Paths) {
 			FG2Link G2Link;
 
-			FString SourceIP = Path.Path[0];
-			FString TargetIP = Path.Path[1];
+			FString SourceIP = Path.Values[0];
+			FString TargetIP = Path.Values[1];
 
 			bool SkipLink = false;
 			for (FG2Link Link : Snapshot->Links) {
-				if (!Snapshot->IDToNodeMap.Contains(SourceIP) || !Snapshot->IDToNodeMap.Contains(TargetIP) ||
-					(Link.Source->ID == SourceIP && Link.Target->ID == TargetIP) ||
-					(Link.Source->ID == TargetIP && Link.Target->ID == SourceIP)) {
+				if (!Snapshot->IDToNodeMap.Contains(SourceIP) || 
+					!Snapshot->IDToNodeMap.Contains(TargetIP) ||
+					(
+						Link.Source->ID == SourceIP && 
+						Link.Target->ID == TargetIP
+					) ||
+					(
+						Link.Source->ID == TargetIP &&
+						Link.Target->ID == SourceIP
+					)
+				) {
 					SkipLink = true;
 					break;
 				}
@@ -252,20 +475,23 @@ void ANetBoxVisualizationController::ParseUE4Data(FUE4Response UE4Response) {
 	RequestNetboxRegionsGet();
 }
 
-void ANetBoxVisualizationController::ParseG2Snapshot(FG2SnapshotResponse SnapshotIn) {
+void ANetBoxVisualizationController::ParseG2Snapshot(
+	const FG2SnapshotResponse& SnapshotIn
+) {
 	FSnapshot SnapshotResponse = SnapshotIn.Data.Snapshots[0];
 
 	ParseNodeData(SnapshotResponse.Topo.Topology.Nodes);
 	ParseLinkData(SnapshotResponse.Topo.Topology.Links);
-	//ParseFlowData(SnapshotResponse.Flows.Flowgroups);
+	ParseFlowData(SnapshotResponse.Flows.Flowgroups);
 
 	UE_LOG(LogTemp, Log, TEXT("Finished Parsing G2 Data."));
 
 	RequestNetboxRegionsGet();
 }
 
-void ANetBoxVisualizationController::ParseRegionData(TArray<FRegionStruct> NetboxRegions)
-{
+void ANetBoxVisualizationController::ParseRegionData(
+	const TArray<FRegionStruct>& NetboxRegions
+) {
 	for (FRegionStruct NetboxRegion : NetboxRegions)
 	{
 		URegion* Region = NewObject<URegion>();
@@ -286,8 +512,9 @@ void ANetBoxVisualizationController::ParseRegionData(TArray<FRegionStruct> Netbo
 	}
 }
 
-void ANetBoxVisualizationController::ParseSiteData(TArray<FSiteStruct> NetboxSites)
-{
+void ANetBoxVisualizationController::ParseSiteData(
+	const TArray<FSiteStruct>& NetboxSites
+) {
 	for (FSiteStruct NetboxSite : NetboxSites)
 	{
 		USite* Site = NewObject<USite>();
@@ -306,8 +533,9 @@ void ANetBoxVisualizationController::ParseSiteData(TArray<FSiteStruct> NetboxSit
 	}
 }
 
-void ANetBoxVisualizationController::ParseLocationData(TArray<FLocationStruct> NetboxLocations)
-{
+void ANetBoxVisualizationController::ParseLocationData(
+	const TArray<FLocationStruct>& NetboxLocations
+) {
 	for (FLocationStruct NetboxLocation : NetboxLocations)
 	{
 		ULocation* Location = NewObject<ULocation>();
@@ -338,8 +566,9 @@ void ANetBoxVisualizationController::ParseLocationData(TArray<FLocationStruct> N
 	}
 }
 
-void ANetBoxVisualizationController::ParseRackData(TArray<FRackStruct> NetboxRacks)
-{
+void ANetBoxVisualizationController::ParseRackData(
+	const TArray<FRackStruct>& NetboxRacks
+) {
 	for (FRackStruct NetboxRack : NetboxRacks)
 	{
 		URack* Rack = NewObject<URack>();
@@ -381,8 +610,9 @@ void ANetBoxVisualizationController::ParseRackData(TArray<FRackStruct> NetboxRac
 	}
 }
 
-void ANetBoxVisualizationController::ParseDeviceTypeData(TArray<FNetboxDeviceType> DeviceTypes)
-{
+void ANetBoxVisualizationController::ParseDeviceTypeData(
+	const TArray<FNetboxDeviceType>& DeviceTypes
+) {
 	for (FNetboxDeviceType NetboxDeviceType : DeviceTypes) {
 		UDeviceType* DeviceType = NewObject<UDeviceType>();
 
@@ -407,7 +637,9 @@ void ANetBoxVisualizationController::ParseDeviceTypeData(TArray<FNetboxDeviceTyp
 	}
 }
 
-void ANetBoxVisualizationController::ParseNodeData(TArray<FG2NodeStruct> SnapshotNodes) {
+void ANetBoxVisualizationController::ParseNodeData(
+	const TArray<FG2NodeStruct>& SnapshotNodes
+) {
 	for (FG2NodeStruct Node : SnapshotNodes) {
 		if (Snapshot->IDToNodeMap.Contains(Node.ID))
 		{
@@ -435,12 +667,18 @@ void ANetBoxVisualizationController::ParseNodeData(TArray<FG2NodeStruct> Snapsho
 		G2Node->IP = IPAddress;
 
 		Snapshot->IDToNodeMap.Add(G2Node->ID, G2Node);
+
+		if (G2Node->IP.Len() != 0) {
+			Snapshot->IPToNodeMap.Add(G2Node->IP, G2Node);
+		}
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Finished Parsing Node Data."));
 }
 
-void ANetBoxVisualizationController::ParseLinkData(TArray<FLink> SnapshotLinks) {
+void ANetBoxVisualizationController::ParseLinkData(
+	const TArray<FLink>& SnapshotLinks
+) {
 	for (FLink Link : SnapshotLinks) {
 		FG2Link G2Link;
 		G2Link.Bandwidth = FCString::Atof(*Link.Bandwidth);
@@ -461,15 +699,21 @@ void ANetBoxVisualizationController::ParseLinkData(TArray<FLink> SnapshotLinks) 
 	UE_LOG(LogTemp, Log, TEXT("Finished Parsing Link Data."));
 }
 
-void ANetBoxVisualizationController::ParseFlowData(TArray<FFlow> SnapshotFlows) {
-	/*
-		for (FFlow Flow : SnapshotFlows) {
-			FString EndName = Flow.End;
-			FString StartName = Flow.Start;
+void ANetBoxVisualizationController::ParseFlowData(
+	const TArray<FFlow>& SnapshotFlows
+) {
+	for (FFlow Flow : SnapshotFlows) {
+		FString EndName = Flow.End;
+		FString StartName = Flow.Start;
 
-			Flow.Info = Flow.Info.Replace(TEXT("'"), TEXT("\""));
+		Flow.Info = Flow.Info.Replace(TEXT("'"), TEXT("\""));
 
-			FFlowInfo FlowInfo = UJsonParser::StringToFlowInfo(Flow.Info);
+		FFlowInfo FlowInfo;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				Flow.Info,
+				&FlowInfo
+			)
+		) {
 			UG2Node* StartNode = *Snapshot->IPToNodeMap.Find(FlowInfo.Src_ip);
 			UG2Node* EndNode = *Snapshot->IPToNodeMap.Find(FlowInfo.Dst_ip);
 
@@ -496,13 +740,16 @@ void ANetBoxVisualizationController::ParseFlowData(TArray<FFlow> SnapshotFlows) 
 
 			Snapshot->Flows.Add(G2Flow);
 		}
+	}
 
-		UE_LOG(LogTemp, Warning, TEXT("Finished Parsing Flow Data."));
-		*/
+	UE_LOG(LogTemp, Warning, TEXT("Finished Parsing Flow Data."));
 }
 
-void ANetBoxVisualizationController::ParseNodeInfo(FString Info, FString& IPAddress,
-	float& MTU) {
+void ANetBoxVisualizationController::ParseNodeInfo(
+	FString Info, 
+	FString& IPAddress,
+	float& MTU
+) {
 	// Find IP Address
 	int IPAddressHeaderIndex = Info.Find("'ipaddress'");
 	if (IPAddressHeaderIndex != -1) {
@@ -543,9 +790,11 @@ void ANetBoxVisualizationController::ParseNodeInfo(FString Info, FString& IPAddr
 	}
 }
 
-void ANetBoxVisualizationController::ReplaceFlowLinkNodeIDs(TArray<FFlowLink>& FlowLinks,
+void ANetBoxVisualizationController::ReplaceFlowLinkNodeIDs(
+	TArray<FFlowLink>& FlowLinks,
 	UG2Node* StartNode,
-	UG2Node* EndNode) {
+	UG2Node* EndNode
+) {
 	if (StartNode != nullptr) {
 		FlowLinks[0].Source = StartNode->ID;
 	}
@@ -559,42 +808,62 @@ void ANetBoxVisualizationController::RequestNetboxRegionsGet()
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRegionsGetResponse"));
-	UReztly::RequestNetboxRegionsGet(NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionsGet(
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
 void ANetBoxVisualizationController::OnNetboxRegionsGetResponse(
 	FString ResponseContentString,
-	bool bWasSuccessful) 
-{
-	if (bWasSuccessful && !ResponseContentString.Contains("\"error\": \"connection to server at")) {
+	bool bWasSuccessful
+) {
+	if (bWasSuccessful && 
+		!ResponseContentString.Contains("\"error\": \"connection to server at")
+	) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FNetboxRegionResponse NetboxRegionResponse =
-			UJsonParser::StringToNetboxRegionResponse(ResponseContentString);
-		AsyncTask(ENamedThreads::GameThread, [this, NetboxRegionResponse]()
+		FNetboxRegionResponse NetboxRegionResponse;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString, 
+				&NetboxRegionResponse
+			)
+		) {
+			AsyncTask(ENamedThreads::GameThread, [this, NetboxRegionResponse]()
 			{
 				ParseRegionData(NetboxRegionResponse.Results);
 
 				RequestNetboxSitesGet();
 			});
+			return;
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
-	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
 }
 
-void ANetBoxVisualizationController::RequestNetboxRegionPatch(FRegionStruct Region)
-{
+void ANetBoxVisualizationController::RequestNetboxRegionPatch(
+	FRegionStruct Region
+) {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRegionPatchResponse"));
-	UReztly::RequestNetboxRegionPatch(Region, NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionPatch(
+		Region, 
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxRegionPatchResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxRegionPatchResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 	}
@@ -609,42 +878,60 @@ void ANetBoxVisualizationController::RequestNetboxSitesGet()
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxSitesGetResponse"));
-	UReztly::RequestNetboxSitesGet(NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitesGet(
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxSitesGetResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
-	if (bWasSuccessful && !ResponseContentString.Contains("\"error\": \"connection to server at")) {
+void ANetBoxVisualizationController::OnNetboxSitesGetResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
+	if (bWasSuccessful && 
+		!ResponseContentString.Contains("\"error\": \"connection to server at")
+	) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FNetboxSiteResponse NetboxSiteResponse =
-			UJsonParser::StringToNetboxSiteResponse(ResponseContentString);
-
-		AsyncTask(ENamedThreads::GameThread, [this, NetboxSiteResponse]()
+		FNetboxSiteResponse NetboxSiteResponse;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString,
+				&NetboxSiteResponse
+			)
+		) {
+			AsyncTask(ENamedThreads::GameThread, [this, NetboxSiteResponse]()
 			{
 				ParseSiteData(NetboxSiteResponse.Results);
 
 				RequestNetboxLocationsGet();
 			});
+			return;
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
-	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
 }
 
-void ANetBoxVisualizationController::RequestNetboxSitePatch(FSiteStruct Site)
-{
+void ANetBoxVisualizationController::RequestNetboxSitePatch(FSiteStruct Site) {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxSitePatchResponse"));
-	UReztly::RequestNetboxSitePatch(Site, NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitePatch(
+		Site, 
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxSitePatchResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxSitePatchResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 	}
@@ -659,41 +946,64 @@ void ANetBoxVisualizationController::RequestNetboxLocationsGet()
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxLocationsGetResponse"));
-	UReztly::RequestNetboxLocationsGet(NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGet(
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxLocationsGetResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
-	if (bWasSuccessful && !ResponseContentString.Contains("\"error\": \"connection to server at")) {
+void ANetBoxVisualizationController::OnNetboxLocationsGetResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
+	if (bWasSuccessful && 
+		!ResponseContentString.Contains("\"error\": \"connection to server at")
+	) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FNetboxLocationResponse NetboxLocationResponse =
-			UJsonParser::StringToNetboxLocationResponse(ResponseContentString);
-		AsyncTask(ENamedThreads::GameThread, [this, NetboxLocationResponse]()
+		FNetboxLocationResponse NetboxLocationResponse;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString, 
+				&NetboxLocationResponse
+			)
+		) {
+			AsyncTask(
+				ENamedThreads::GameThread, 
+				[this, NetboxLocationResponse]()
 			{
 				ParseLocationData(NetboxLocationResponse.Results);
 
 				RequestNetboxRacksGet();
 			});
+			return;
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
-	}
+		
+	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
 }
 
-void ANetBoxVisualizationController::RequestNetboxLocationPatch(FLocationStruct Location)
-{
+void ANetBoxVisualizationController::RequestNetboxLocationPatch(
+	FLocationStruct Location
+) {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxSitePatchResponse"));
-	UReztly::RequestNetboxLocationPatch(Location, NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationPatch(
+		Location, 
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxLocationPatchResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxLocationPatchResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 	}
@@ -708,41 +1018,61 @@ void ANetBoxVisualizationController::RequestNetboxRacksGet()
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRacksGetResponse"));
-	UReztly::RequestNetboxRacksGet(NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGet(
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxRacksGetResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
-	if (bWasSuccessful && !ResponseContentString.Contains("\"error\": \"connection to server at")) {
+void ANetBoxVisualizationController::OnNetboxRacksGetResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
+	if (bWasSuccessful && 
+		!ResponseContentString.Contains("\"error\": \"connection to server at")
+	) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FNetboxRackResponse NetboxRackResponse =
-			UJsonParser::StringToNetboxRackResponse(ResponseContentString);
-		AsyncTask(ENamedThreads::GameThread, [this, NetboxRackResponse]()
+		FNetboxRackResponse NetboxRackResponse;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString,
+				&NetboxRackResponse
+			)
+		) {
+			AsyncTask(ENamedThreads::GameThread, [this, NetboxRackResponse]()
 			{
 				ParseRackData(NetboxRackResponse.Results);
 
 				RequestNetboxDeviceTypesGet();
 			});
+			return;
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
-	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
 }
 
 void ANetBoxVisualizationController::RequestNetboxRackPatch(FRackStruct Rack)
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRackPatchResponse"));
-	UReztly::RequestNetboxRackPatch(Rack, NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRackPatch(
+		Rack, 
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxRackPatchResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxRackPatchResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 	}
@@ -753,59 +1083,79 @@ void ANetBoxVisualizationController::OnNetboxRackPatchResponse(FString ResponseC
 		*ResponseContentString);
 }
 
-void ANetBoxVisualizationController::RequestNetboxDeviceTypesGet()
-{
+void ANetBoxVisualizationController::RequestNetboxDeviceTypesGet() {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxDeviceTypesResponse"));
-	UReztly::RequestNetboxDeviceTypesGet(NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDeviceTypesGet(
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxDeviceTypesResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxDeviceTypesResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FNetboxDeviceTypeResponse NetboxDeviceTypeResponse =
-			UJsonParser::StringToNetboxDeviceTypeResponse(ResponseContentString);
-
-		AsyncTask(ENamedThreads::GameThread, [this, NetboxDeviceTypeResponse]()
+		FNetboxDeviceTypeResponse NetboxDeviceTypeResponse;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString,
+				&NetboxDeviceTypeResponse
+			)
+		) {
+			AsyncTask(
+				ENamedThreads::GameThread, 
+				[this, NetboxDeviceTypeResponse]()
 			{
 				ParseDeviceTypeData(NetboxDeviceTypeResponse.Results);
 
 				RequestNetboxDevicesGet();
 			});
+			return;
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
 }
 
 void ANetBoxVisualizationController::RequestNetboxDevicesGet()
 {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxDevicesResponse"));
-	UReztly::RequestNetboxDevicesGet(NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesGet(
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxDevicesResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxDevicesResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		FNetboxDeviceResponse NetboxDeviceResponse =
-			UJsonParser::StringToNetboxDeviceResponse(ResponseContentString);
-		AsyncTask(ENamedThreads::GameThread, [this, NetboxDeviceResponse]()
+		FNetboxDeviceResponse NetboxDeviceResponse;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+				ResponseContentString,
+				&NetboxDeviceResponse
+			)
+		) {
+			AsyncTask(ENamedThreads::GameThread, [this, NetboxDeviceResponse]()
 			{
 				ParseNetboxDeviceData(NetboxDeviceResponse);
 
 				if (NetboxDeviceResponse.Next == "") {
-					AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, 
+					AsyncTask(ENamedThreads::AnyBackgroundHiPriTask,
 						[this, NetboxDeviceResponse]()
 						{
 							CrossReferenceNodeData();
@@ -813,18 +1163,28 @@ void ANetBoxVisualizationController::OnNetboxDevicesResponse(FString ResponseCon
 				}
 				else {
 					FStringResponseDelegate Delegate;
-					Delegate.BindUFunction(this, FName("OnNetboxDevicesResponse"));
-					UReztly::RequestNetboxGet(NetboxDeviceResponse.Next, NetboxToken, Delegate);
+					Delegate.BindUFunction(
+						this, 
+						FName("OnNetboxDevicesResponse")
+					);
+
+					UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxGet(
+						NetboxDeviceResponse.Next, 
+						NetboxToken, 
+						Delegate
+					);
 				}
 			});
+			return;
+		}		
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
-	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
 }
 
-void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse NetboxResponse)
-{
+void ANetBoxVisualizationController::ParseNetboxDeviceData(
+	const FNetboxDeviceResponse& NetboxResponse
+) {
 	for (FNetboxDevice NetboxDevice : NetboxResponse.Results)
 	{
 		UDevice* Device = NewObject<UDevice>();
@@ -835,11 +1195,19 @@ void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse
 		Device->Info = NetboxDevice.Custom_fields.Info;
 		Device->Position = NetboxDevice.Position;
 
-		Device->WorldLocationOffset.InitFromString(NetboxDevice.Custom_fields.Device_world_location_offset);
-		Device->WorldRotationOffset.InitFromString(NetboxDevice.Custom_fields.Device_world_rotation_offset);
+		Device->WorldLocationOffset.InitFromString(
+			NetboxDevice.Custom_fields.Device_world_location_offset
+		);
+		Device->WorldRotationOffset.InitFromString(
+			NetboxDevice.Custom_fields.Device_world_rotation_offset
+		);
 
 		TArray<FString> IPAddressStringParts;
-		NetboxDevice.Primary_ip.Address.ParseIntoArray(IPAddressStringParts, TEXT("/"), true);
+		NetboxDevice.Primary_ip.Address.ParseIntoArray(
+			IPAddressStringParts, 
+			TEXT("/"), 
+			true
+		);
 		Device->IP = IPAddressStringParts.Num() > 0 ?
 			IPAddressStringParts[0] : "";
 
@@ -855,7 +1223,8 @@ void ANetBoxVisualizationController::ParseNetboxDeviceData(FNetboxDeviceResponse
 			Device->Rack = NameToRackMap[NetboxDevice.Rack.Name];
 		}
 
-		Device->DeviceType = ModelToDeviceTypeMap[NetboxDevice.Device_Type.Model];
+		Device->DeviceType = 
+			ModelToDeviceTypeMap[NetboxDevice.Device_Type.Model];
 
 		NameToDeviceMap.Add(Device->Name, Device);
 	}
@@ -987,7 +1356,7 @@ void ANetBoxVisualizationController::RequestNetboxDevicesPost()
 
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPostDeviceResponse"));
-	UReztly::RequestNetboxDevicesPost(DeviceBatch, NetboxURL, NetboxToken, Delegate);
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPost(DeviceBatch, NetboxURL, NetboxToken, Delegate);
 
 	CurrentNewBatch++;
 }
@@ -1000,20 +1369,32 @@ void ANetBoxVisualizationController::OnNetboxPostDeviceResponse(FString Response
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		TArray<FNetboxDevice> DeviceResults =
-			UJsonParser::StringToDevices(ResponseContentString);
-		for (FNetboxDevice DeviceStruct : DeviceResults) {
-			UDevice* Device = NameToDeviceMap[DeviceStruct.Name];
-			Device->ID = DeviceStruct.Id;
-			Device->Url = DeviceStruct.Url;
-			Device->Display = DeviceStruct.Display;
+		TArray<FNetboxDevice> DeviceResults; 
+		if (FJsonObjectConverter::JsonArrayStringToUStruct(
+				ResponseContentString, 
+				&DeviceResults
+			)
+		) {
+			for (FNetboxDevice DeviceStruct : DeviceResults) {
+				UDevice* Device = NameToDeviceMap[DeviceStruct.Name];
+				Device->ID = DeviceStruct.Id;
+				Device->Url = DeviceStruct.Url;
+				Device->Display = DeviceStruct.Display;
+			}
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Unable to parse Device Results"));
 		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Netbox Post Device Batch Unsuccessful"));
 	}
 
-	int BatchSize = FGenericPlatformMath::Min(MaxEntriesPerRequest, NewDevices.Num());
+	int BatchSize = FGenericPlatformMath::Min(
+		MaxEntriesPerRequest, 
+		NewDevices.Num()
+	);
+
 	for (int i = 0; i < BatchSize; i++) {
 		NewDevices.RemoveAt(0);
 	}
@@ -1022,7 +1403,14 @@ void ANetBoxVisualizationController::OnNetboxPostDeviceResponse(FString Response
 		if (NumUpdateBatches > 0)
 		{
 			CurrentUpdateDevice = 1;
-			UE_LOG(LogTemp, Log, TEXT("Updating %d Devices"), DevicesToUpdate.Num());
+
+			UE_LOG(
+				LogTemp,
+				Log, 
+				TEXT("Updating %d Devices"), 
+				DevicesToUpdate.Num()
+			);
+
 			RequestNetboxDevicesPatch();
 		}
 		else {
@@ -1039,31 +1427,56 @@ void ANetBoxVisualizationController::OnNetboxPostDeviceResponse(FString Response
 void ANetBoxVisualizationController::RequestNetboxDevicesPatch()
 {
 	TArray<FNetboxDevice> DeviceBatch;
-	for (int i = 0; i < FGenericPlatformMath::Min(MaxEntriesPerRequest, DevicesToUpdate.Num()); i++)
-	{
+	for (int i = 0; 
+		i < FGenericPlatformMath::Min(
+			MaxEntriesPerRequest, 
+			DevicesToUpdate.Num()
+		);
+		i++
+	) {
 		DeviceBatch.Add(DevicesToUpdate[i]->ToStruct());
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Device Patch Request %d/%d"), CurrentUpdateDevice, NumUpdateBatches);
+	UE_LOG(
+		LogTemp, 
+		Log, 
+		TEXT("Device Patch Request %d/%d"),
+		CurrentUpdateDevice, 
+		NumUpdateBatches
+	);
 
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPatchDevicesResponse"));
-	UReztly::RequestNetboxDevicesPatch(DeviceBatch, NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPatch(
+		DeviceBatch, 
+		NetboxURL, 
+		NetboxToken, 
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::RequestNetboxDevicePatch(FNetboxDevice Device)
-{
+void ANetBoxVisualizationController::RequestNetboxDevicePatch(
+	const FNetboxDevice& Device
+) {
 	FStringResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPatchDeviceResponse"));
 
 	TArray<FNetboxDevice> Devices;
 	Devices.Add(Device);
-	UReztly::RequestNetboxDevicesPatch(Devices, NetboxURL, NetboxToken, Delegate);
+
+	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPatch(
+		Devices, 
+		NetboxURL, 
+		NetboxToken,
+		Delegate
+	);
 }
 
-void ANetBoxVisualizationController::OnNetboxPatchDeviceResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxPatchDeviceResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Request Successful"));
 	}
@@ -1074,22 +1487,36 @@ void ANetBoxVisualizationController::OnNetboxPatchDeviceResponse(FString Respons
 		*ResponseContentString);
 }
 
-void ANetBoxVisualizationController::OnNetboxPatchDevicesResponse(FString ResponseContentString,
-	bool bWasSuccessful)
-{
+void ANetBoxVisualizationController::OnNetboxPatchDevicesResponse(
+	FString ResponseContentString,
+	bool bWasSuccessful
+) {
 	if (bWasSuccessful) {
 		UE_LOG(LogTemp, Log, TEXT("Netbox Patch Device Batch Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
 
-		TArray<FNetboxDevice> DeviceResults =
-			UJsonParser::StringToDevices(ResponseContentString);
+		TArray<FNetboxDevice> DeviceResults;
+		if (!FJsonObjectConverter::JsonArrayStringToUStruct(
+				ResponseContentString, 
+				&DeviceResults)
+		) {
+			UE_LOG(LogTemp, Warning, TEXT("Unable to parse Device Results"));
+		}
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Netbox Patch Device Batch Unsuccessful"));
+		UE_LOG(
+			LogTemp, 
+			Warning, 
+			TEXT("Netbox Patch Device Batch Unsuccessful")
+		);
 	}
 
-	int BatchSize = FGenericPlatformMath::Min(MaxEntriesPerRequest, DevicesToUpdate.Num());
+	int BatchSize = FGenericPlatformMath::Min(
+		MaxEntriesPerRequest, 
+		DevicesToUpdate.Num()
+	);
+
 	for (int i = 0; i < BatchSize; i++) {
 		DevicesToUpdate.RemoveAt(0);
 	}
@@ -1115,12 +1542,17 @@ bool ANetBoxVisualizationController::SnapshotAvailable(int SnapshotID) {
 }
 
 #include "Misc/Char.h"
-bool ANetBoxVisualizationController::IsValidLatLong(float Latitude, float Longitude) {
-	return FGenericPlatformMath::Abs(Latitude - KansasLatitude) > KansasThreshold ||
-		FGenericPlatformMath::Abs(Longitude - KansasLongitude) > KansasThreshold;
+bool ANetBoxVisualizationController::IsValidLatLong(
+	float Latitude,
+	float Longitude
+) {
+	return FGenericPlatformMath::Abs(Latitude - KansasLatitude) > 
+		KansasThreshold ||
+		FGenericPlatformMath::Abs(Longitude - KansasLongitude) > 
+		KansasThreshold;
 }
 
-bool ANetBoxVisualizationController::IsHop(FString Name) {
+bool ANetBoxVisualizationController::IsHop(const FString& Name) {
 	std::string NameString = std::string(TCHAR_TO_UTF8(*Name));
 
 	if (Name.Len() < 2 || NameString[0] != 's') {

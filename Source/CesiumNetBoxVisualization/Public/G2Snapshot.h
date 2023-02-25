@@ -57,6 +57,9 @@ public:
 	    TMap<FString, UG2Node*> IDToNodeMap;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TMap<FString, UG2Node*> IPToNodeMap;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<FG2Link> Links;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

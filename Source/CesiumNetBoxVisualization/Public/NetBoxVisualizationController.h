@@ -157,25 +157,25 @@ public:
 			bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable)
-		void ParseG2Snapshot(FG2SnapshotResponse SnapshotIn);
+		void ParseG2Snapshot(const FG2SnapshotResponse& SnapshotIn);
 	UFUNCTION(BlueprintCallable)
-		void ParseRegionData(TArray<FRegionStruct> NetboxRegions);
+		void ParseRegionData(const TArray<FRegionStruct>& NetboxRegions);
 	UFUNCTION(BlueprintCallable)
-		void ParseSiteData(TArray<FSiteStruct> NetboxSites);
+		void ParseSiteData(const TArray<FSiteStruct>& NetboxSites);
 	UFUNCTION(BlueprintCallable)
-		void ParseLocationData(TArray<FLocationStruct> NetboxLocations);
+		void ParseLocationData(const TArray<FLocationStruct>& NetboxLocations);
 	UFUNCTION(BlueprintCallable)
-		void ParseRackData(TArray<FRackStruct> NetboxRacks);
+		void ParseRackData(const TArray<FRackStruct>& NetboxRacks);
 	UFUNCTION(BlueprintCallable)
-		void ParseDeviceTypeData(TArray<FNetboxDeviceType> DeviceTypes);
+		void ParseDeviceTypeData(const TArray<FNetboxDeviceType>& DeviceTypes);
 	UFUNCTION(BlueprintCallable)
-		void ParseNodeData(TArray<FG2NodeStruct> SnapshotNodes);
+		void ParseNodeData(const TArray<FG2NodeStruct>& SnapshotNodes);
 	UFUNCTION(BlueprintCallable)
-		void ParseLinkData(TArray<FLink> SnapshotLinks);
+		void ParseLinkData(const TArray<FLink>& SnapshotLinks);
 	UFUNCTION(BlueprintCallable)
-		void ParseFlowData(TArray<FFlow> SnapshotFlows);
+		void ParseFlowData(const TArray<FFlow>& SnapshotFlows);
 	UFUNCTION(BlueprintCallable)
-		void ParseUE4Data(FUE4Response UE4Response);
+		void ParseUE4Data(const FUE4Response& UE4Response);
 
 
 	UFUNCTION(BlueprintCallable)
@@ -268,7 +268,7 @@ public:
 		);
 
 	UFUNCTION(BlueprintCallable)
-		void ParseNetboxDeviceData(FNetboxDeviceResponse NetboxResponse);
+		void ParseNetboxDeviceData(const FNetboxDeviceResponse& NetboxResponse);
 	UFUNCTION(BlueprintCallable)
 		void CrossReferenceNodeData();
 	UFUNCTION(BlueprintCallable)
@@ -285,7 +285,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RequestNetboxDevicesPatch();
 	UFUNCTION(BlueprintCallable)
-		void RequestNetboxDevicePatch(FNetboxDevice Device);
+		void RequestNetboxDevicePatch(const FNetboxDevice& Device);
 	UFUNCTION(BlueprintCallable)
 		void OnNetboxPatchDevicesResponse(
 			FString ResponseContentString,
@@ -302,6 +302,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		bool IsValidLatLong(float Latitude, float Longitude);
 	UFUNCTION(BlueprintCallable)
-		static bool IsHop(FString Name);
+		static bool IsHop(const FString& Name);
 
 };

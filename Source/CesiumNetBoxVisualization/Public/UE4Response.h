@@ -9,7 +9,7 @@ struct FPath
 	GENERATED_USTRUCT_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite)
-		TArray<FString> Path;
+		TArray<FString> Values;
 };
 
 USTRUCT(BlueprintType)

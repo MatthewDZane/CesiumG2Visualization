@@ -14,13 +14,14 @@
 #include "NetboxLocationResponse.h"
 #include "NetboxRackResponse.h"
 
-#include "ReztlyLibrary.generated.h"
+#include "CesiumNetBoxVisualizationRequestLibrary.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CESIUMNETBOXVISUALIZATION_API UReztly : public UBlueprintFunctionLibrary
+class CESIUMNETBOXVISUALIZATION_API UCesiumNetBoxVisualizationRequestLibrary :
+	public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 	
