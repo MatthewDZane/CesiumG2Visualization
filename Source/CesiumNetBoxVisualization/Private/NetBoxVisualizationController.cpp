@@ -2,9 +2,10 @@
 
 
 #include "NetBoxVisualizationController.h"
-#include "JsonParser.h"
 #include "CesiumNetBoxVisualizationRequestLibrary.h"
 #include "ReztlyFunctionLibrary.h"
+#include "JsonObjectConverter.h"
+#include "FlowInfo.h"
 
 // Sets default values
 ANetBoxVisualizationController::ANetBoxVisualizationController() {
@@ -318,7 +319,7 @@ void ANetBoxVisualizationController::OnUE4DataUtilsResponse(
 
 						// Parse Hostname Field
 						bool PrimaryFieldFound;
-						NodeJsonObject->GetFieldValueAsBool("primary", NodeStruct.Primary, PrimaryFieldFound);
+						NodeJsonObject->GetFieldValueAsBoolean("primary", NodeStruct.Primary, PrimaryFieldFound);
 
 						ResponseSnapshot.Nodes.Add(NodeStruct);
 					}
@@ -341,15 +342,15 @@ void ANetBoxVisualizationController::OnUE4DataUtilsResponse(
 
 						// Parse Source Field
 						bool SourceFieldFound;
-						EdgeJsonObject->GetFieldValueAsInt("source", EdgeStruct.Source, SourceFieldFound);
+						EdgeJsonObject->GetFieldValueAsInteger("source", EdgeStruct.Source, SourceFieldFound);
 
 						// Parse Target Field
 						bool TargetFieldFound;
-						EdgeJsonObject->GetFieldValueAsInt("target", EdgeStruct.Target, TargetFieldFound);
+						EdgeJsonObject->GetFieldValueAsInteger("target", EdgeStruct.Target, TargetFieldFound);
 
 						// Parse Mtu Field
 						bool MtuFieldFound;
-						EdgeJsonObject->GetFieldValueAsInt("mtu", EdgeStruct.Mtu, MtuFieldFound);
+						EdgeJsonObject->GetFieldValueAsInteger("mtu", EdgeStruct.Mtu, MtuFieldFound);
 
 						// Parse Latency Field
 						bool LatencyFieldFound;
