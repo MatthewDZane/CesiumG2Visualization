@@ -13,7 +13,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class CESIUMNETBOXVISUALIZATION_API URack : public UObject
 {
 	GENERATED_BODY()

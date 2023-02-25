@@ -12,7 +12,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class CESIUMNETBOXVISUALIZATION_API UG2Node : public UObject
 {
 	GENERATED_BODY()

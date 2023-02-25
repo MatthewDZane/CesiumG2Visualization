@@ -10,7 +10,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(Blueprintable)
 class CESIUMNETBOXVISUALIZATION_API URegion : public UObject
 {
 	GENERATED_BODY()

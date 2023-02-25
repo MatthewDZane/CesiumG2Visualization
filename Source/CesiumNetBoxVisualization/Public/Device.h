@@ -14,7 +14,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class CESIUMNETBOXVISUALIZATION_API UDevice : public UObject
 {
 	GENERATED_BODY()
