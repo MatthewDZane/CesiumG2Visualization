@@ -6,8 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Http.h"
 
-#include "ReztlyFStringResponse.h"
-#include "ReztlyImageResponse.h"
+#include "ReztlyResponse.h"
 #include "G2Node.h"
 #include "Site.h"
 #include "NetboxLocationResponse.h"
@@ -33,14 +32,14 @@ public:
 			FString G2Username, 
 			FString G2Password,
 			FString G2APIUrl,
-			FStringResponseDelegate OnBearerTokenResponse
+			FResponseDelegate OnBearerTokenResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestSnapshotRange(
 			FString G2APIUrl, 
 			FString G2BearerToken,
-			FStringResponseDelegate OnSnapshotRangeResponse
+			FResponseDelegate OnSnapshotRangeResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -48,27 +47,27 @@ public:
 			int SnapshotID,
 			FString G2APIUrl,
 			FString G2BearerToken,
-			FStringResponseDelegate OnSnapshotResponse
+			FResponseDelegate OnSnapshotResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestUE4NautilusData(
 			FString UE4NautilusDataUtilsUrl, 
-			FStringResponseDelegate OnUE4NautliusDataResponse
+			FResponseDelegate OnUE4NautliusDataResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxGet(
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxRegionsGetResponse
+			FResponseDelegate OnNetboxRegionsGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxRegionsGet(
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxRegionsGetResponse
+			FResponseDelegate OnNetboxRegionsGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -76,14 +75,14 @@ public:
 			FRegionStruct Region, 
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxPatchResponse
+			FResponseDelegate OnNetboxPatchResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxSitesGet(
 			FString NetboxUrl,
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxSitesGetResponse
+			FResponseDelegate OnNetboxSitesGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -91,14 +90,14 @@ public:
 			FSiteStruct Site, 
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxSitePatchResponse
+			FResponseDelegate OnNetboxSitePatchResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxLocationsGet(
 			FString NetboxUrl,
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxLocationsGetResponse
+			FResponseDelegate OnNetboxLocationsGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -106,7 +105,7 @@ public:
 			FSiteStruct Site, 
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxLocationsGetBySiteResponse
+			FResponseDelegate OnNetboxLocationsGetBySiteResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -114,14 +113,14 @@ public:
 			FLocationStruct Location, 
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxLocationPatchResponse
+			FResponseDelegate OnNetboxLocationPatchResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxRacksGet(
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxRacksGetResponse
+			FResponseDelegate OnNetboxRacksGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -129,7 +128,7 @@ public:
 			FSiteStruct Site, 
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxRacksGetBySiteResponse
+			FResponseDelegate OnNetboxRacksGetBySiteResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -137,7 +136,7 @@ public:
 			FLocationStruct Location,
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxRacksGetByLocationResponse
+			FResponseDelegate OnNetboxRacksGetByLocationResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -145,21 +144,21 @@ public:
 			FRackStruct Rack, 
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxRackPatchResponse
+			FResponseDelegate OnNetboxRackPatchResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxDeviceTypesGet(
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxDevicesTypeGetResponse
+			FResponseDelegate OnNetboxDevicesTypeGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
 		static void RequestNetboxDevicesGet(
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxDeviceGetResponse
+			FResponseDelegate OnNetboxDeviceGetResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -167,7 +166,7 @@ public:
 			TArray<FNetboxDevice> Devices, 
 			FString NetboxUrl,
 			FString NetboxToken, 
-			FStringResponseDelegate OnNetboxPostResponse
+			FResponseDelegate OnNetboxPostResponse
 		);
 
 	UFUNCTION(BlueprintCallable)
@@ -175,12 +174,7 @@ public:
 			TArray<FNetboxDevice> Devices,
 			FString NetboxUrl, 
 			FString NetboxToken,
-			FStringResponseDelegate OnNetboxPatchResponse
+			FResponseDelegate OnNetboxPatchResponse
 		);
-
-	UFUNCTION(BlueprintCallable)
-		static void RequestImageGet(
-			FString ImageUrl, 
-			FImageResponseDelegate OnImageGetResponse
-		);   
+ 
 };

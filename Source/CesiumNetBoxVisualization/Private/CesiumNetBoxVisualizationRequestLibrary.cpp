@@ -9,7 +9,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestBearerToken(
 	FString G2Username, 
 	FString G2Password, 
 	FString G2APIUrl,
-    FStringResponseDelegate OnBearerTokenResponseDelegate
+    FResponseDelegate OnBearerTokenResponseDelegate
 ) {
 	FString Url = G2APIUrl + "/api/auth/login";
 
@@ -22,7 +22,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestBearerToken(
 		TJsonWriterFactory<>::Create(&RequestBodyString);
 	FJsonSerializer::Serialize(RequestBody.ToSharedRef(), Writer);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url, 
 		EReztlyVerb::POST,
 		TMap<FString, FString>(),
@@ -34,14 +34,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestBearerToken(
 void UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshotRange(
 	FString G2APIUrl, 
 	FString G2BearerToken,
-	FStringResponseDelegate OnSnapshotRangeResponse
+	FResponseDelegate OnSnapshotRangeResponse
 ) {
 	FString Url = G2APIUrl + "api/tsrange/-1/0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + G2BearerToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -54,14 +54,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshot(
 	int SnapshotID, 
 	FString G2APIUrl, 
 	FString G2BearerToken,
-	FStringResponseDelegate OnSnapshotResponse
+	FResponseDelegate OnSnapshotResponse
 ) {
 	FString Url = G2APIUrl + "api/snapshot?id=" + FString::FromInt(SnapshotID);
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + G2BearerToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -72,9 +72,9 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshot(
 
 void UCesiumNetBoxVisualizationRequestLibrary::RequestUE4NautilusData(
 	FString UE4NautilusDataUtilsUrl, 
-	FStringResponseDelegate OnUE4NautilusDataResponse
+	FResponseDelegate OnUE4NautilusDataResponse
 ) {
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		UE4NautilusDataUtilsUrl,
 		EReztlyVerb::GET,
 		TMap<FString, FString>(),
@@ -86,12 +86,12 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestUE4NautilusData(
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxGet(
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxResponse
+	FResponseDelegate OnNetboxResponse
 ) {
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		NetboxUrl,
 		EReztlyVerb::GET,
 		Headers,
@@ -103,14 +103,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxGet(
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionsGet(
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxRegionsResponse
+	FResponseDelegate OnNetboxRegionsResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/regions/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -123,7 +123,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionPatch(
 	FRegionStruct Region, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxRegionPatchResponse
+	FResponseDelegate OnNetboxRegionPatchResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/regions/";
 
@@ -137,7 +137,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionPatch(
 		"\",\"region_longitude\":\"" + 
 		Region.Custom_fields.Region_longitude + "\"}}]";
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::PATCH,
 		Headers,
@@ -148,14 +148,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionPatch(
 
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitesGet(
 	FString NetboxUrl, FString NetboxToken,
-	FStringResponseDelegate OnNetboxSitesGetResponse)
+	FResponseDelegate OnNetboxSitesGetResponse)
 {
 	FString Url = NetboxUrl + "/dcim/sites/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -168,7 +168,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitePatch(
 	FSiteStruct Site, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxSitePatchResponse
+	FResponseDelegate OnNetboxSitePatchResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/sites/";
 
@@ -180,7 +180,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitePatch(
 		FString::SanitizeFloat(Site.Latitude) + ",\"longitude\":" +
 		FString::SanitizeFloat(Site.Longitude) + "}]";
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::PATCH,
 		Headers,
@@ -192,14 +192,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitePatch(
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGet(
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxLocationsGetResponse
+	FResponseDelegate OnNetboxLocationsGetResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/locations/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -212,7 +212,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGetBySite(
 	FSiteStruct Site, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxLocationsGetBySiteResponse
+	FResponseDelegate OnNetboxLocationsGetBySiteResponse
 ) {
 	FString Url = 
 		NetboxUrl + "/dcim/locations/?limit=0&offset=0&site=" +	Site.Slug;
@@ -220,7 +220,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGetBySite(
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -233,7 +233,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationPatch(
 	FLocationStruct Location, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxLocationPatchResponse
+	FResponseDelegate OnNetboxLocationPatchResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/locations/";
 
@@ -248,7 +248,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationPatch(
 		"\",\"location_world_rotation_offset\":\"" + 
 		Location.Custom_fields.Location_world_rotation_offset + "\"}}]";
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::PATCH,
 		Headers,
@@ -259,14 +259,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationPatch(
 
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGet(
 	FString NetboxUrl, FString NetboxToken,
-	FStringResponseDelegate OnNetboxRacksGetResponse)
+	FResponseDelegate OnNetboxRacksGetResponse)
 {
 	FString Url = NetboxUrl + "/dcim/racks/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -279,14 +279,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGetBySite(
 	FSiteStruct Site, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxRacksGetResponse
+	FResponseDelegate OnNetboxRacksGetResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/racks/?limit=0&offset=0&site=" + Site.Slug;
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -299,14 +299,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGetByLocation(
 	FLocationStruct Location, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxRacksGetResponse
+	FResponseDelegate OnNetboxRacksGetResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/racks/?limit=0&offset=0&location=" + Location.Slug;
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::PATCH,
 		Headers,
@@ -319,7 +319,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRackPatch(
 	FRackStruct Rack, 
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxRackPatchResponse
+	FResponseDelegate OnNetboxRackPatchResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/racks/";
 
@@ -339,7 +339,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRackPatch(
 		Rack.Custom_fields.Rack_world_rotation_offset + "\"}}]";
 
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::PATCH,
 		Headers,
@@ -351,14 +351,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRackPatch(
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDeviceTypesGet(
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxDataResponse
+	FResponseDelegate OnNetboxDataResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/device-types/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -370,14 +370,14 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDeviceTypesGet(
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesGet(
 	FString NetboxUrl, 
 	FString NetboxToken,
-	FStringResponseDelegate OnNetboxDataResponse
+	FResponseDelegate OnNetboxDataResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/devices/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::GET,
 		Headers,
@@ -390,7 +390,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPost(
 	TArray<FNetboxDevice> Devices, 
 	FString NetboxUrl, 
 	FString NetboxToken, 
-	FStringResponseDelegate OnNetboxPostResponse
+	FResponseDelegate OnNetboxPostResponse
 ) {
 	FString Url = NetboxUrl + "/dcim/devices/";
 
@@ -422,7 +422,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPost(
 	RequestBody += "]";
 
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::POST,
 		Headers,
@@ -433,7 +433,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPost(
 
 void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPatch(
 	TArray<FNetboxDevice> Devices, FString NetboxUrl, FString NetboxToken,
-	FStringResponseDelegate OnNetboxPatchResponse)
+	FResponseDelegate OnNetboxPatchResponse)
 {
 	FString Url = NetboxUrl + "/dcim/devices/";
 
@@ -469,23 +469,11 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPatch(
 	RequestBody += "]";
 
 
-	UReztlyFunctionLibrary::RequestString(
+	UReztlyFunctionLibrary::MakeRequest(
 		Url,
 		EReztlyVerb::PATCH,
 		Headers,
 		RequestBody,
 		OnNetboxPatchResponse
-	);
-}
-
-void UCesiumNetBoxVisualizationRequestLibrary::RequestImageGet(
-	FString ImageUrl, FImageResponseDelegate OnImageGetResponse)
-{
-	UReztlyFunctionLibrary::RequestImage(
-		ImageUrl,
-		EReztlyVerb::GET,
-		TMap<FString, FString>(),
-		"",
-		OnImageGetResponse
 	);
 }

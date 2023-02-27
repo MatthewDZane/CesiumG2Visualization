@@ -42,7 +42,7 @@ void ANetBoxVisualizationController::RequestVisualizationData() {
 }
 
 void ANetBoxVisualizationController::RequestBearerToken() {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnBearerTokenResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestBearerToken(
@@ -80,7 +80,7 @@ void ANetBoxVisualizationController::OnBearerTokenResponse(
 
 void ANetBoxVisualizationController::RequestSnapshotRange()
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnSnapshotRangeResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshotRange(
@@ -172,7 +172,7 @@ void ANetBoxVisualizationController::RequestSnapshot(
 	Snapshot->ID = SnapshotID;
 	Snapshot->TimeStamp = TimeStamp;
 
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnSnapshotResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshot(
@@ -234,7 +234,7 @@ void ANetBoxVisualizationController::OnSnapshotResponse(
 }
 
 void ANetBoxVisualizationController::RequestUE4DataUtilsData() {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnUE4DataUtilsResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestUE4NautilusData(
@@ -254,7 +254,7 @@ void ANetBoxVisualizationController::OnUE4DataUtilsResponse(
 
 		EReztlyResult ExecResult;
 		UReztlyJsonObject* JsonObject = UReztlyFunctionLibrary::StringToJson(ExecResult, ResponseContentString);
-		if (ExecResult == EReztlyResult::VALID)
+		if (ExecResult == EReztlyResult::Valid)
 		{
 			FUE4Response ResponseSnapshot;
 
@@ -807,7 +807,7 @@ void ANetBoxVisualizationController::ReplaceFlowLinkNodeIDs(
 
 void ANetBoxVisualizationController::RequestNetboxRegionsGet()
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRegionsGetResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionsGet(
@@ -850,7 +850,7 @@ void ANetBoxVisualizationController::OnNetboxRegionsGetResponse(
 void ANetBoxVisualizationController::RequestNetboxRegionPatch(
 	FRegionStruct Region
 ) {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRegionPatchResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionPatch(
@@ -877,7 +877,7 @@ void ANetBoxVisualizationController::OnNetboxRegionPatchResponse(
 
 void ANetBoxVisualizationController::RequestNetboxSitesGet()
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxSitesGetResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitesGet(
@@ -918,7 +918,7 @@ void ANetBoxVisualizationController::OnNetboxSitesGetResponse(
 }
 
 void ANetBoxVisualizationController::RequestNetboxSitePatch(FSiteStruct Site) {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxSitePatchResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitePatch(
@@ -945,7 +945,7 @@ void ANetBoxVisualizationController::OnNetboxSitePatchResponse(
 
 void ANetBoxVisualizationController::RequestNetboxLocationsGet()
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxLocationsGetResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGet(
@@ -990,7 +990,7 @@ void ANetBoxVisualizationController::OnNetboxLocationsGetResponse(
 void ANetBoxVisualizationController::RequestNetboxLocationPatch(
 	FLocationStruct Location
 ) {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxSitePatchResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationPatch(
@@ -1017,7 +1017,7 @@ void ANetBoxVisualizationController::OnNetboxLocationPatchResponse(
 
 void ANetBoxVisualizationController::RequestNetboxRacksGet()
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRacksGetResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGet(
@@ -1059,7 +1059,7 @@ void ANetBoxVisualizationController::OnNetboxRacksGetResponse(
 
 void ANetBoxVisualizationController::RequestNetboxRackPatch(FRackStruct Rack)
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxRackPatchResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRackPatch(
@@ -1085,7 +1085,7 @@ void ANetBoxVisualizationController::OnNetboxRackPatchResponse(
 }
 
 void ANetBoxVisualizationController::RequestNetboxDeviceTypesGet() {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxDeviceTypesResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDeviceTypesGet(
@@ -1126,7 +1126,7 @@ void ANetBoxVisualizationController::OnNetboxDeviceTypesResponse(
 
 void ANetBoxVisualizationController::RequestNetboxDevicesGet()
 {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxDevicesResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesGet(
@@ -1163,7 +1163,7 @@ void ANetBoxVisualizationController::OnNetboxDevicesResponse(
 						});
 				}
 				else {
-					FStringResponseDelegate Delegate;
+					FResponseDelegate Delegate;
 					Delegate.BindUFunction(
 						this, 
 						FName("OnNetboxDevicesResponse")
@@ -1355,7 +1355,7 @@ void ANetBoxVisualizationController::RequestNetboxDevicesPost()
 
 	UE_LOG(LogTemp, Log, TEXT("Device Post Request %d/%d"), CurrentNewBatch, NumNewBatches);
 
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPostDeviceResponse"));
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPost(DeviceBatch, NetboxURL, NetboxToken, Delegate);
 
@@ -1446,7 +1446,7 @@ void ANetBoxVisualizationController::RequestNetboxDevicesPatch()
 		NumUpdateBatches
 	);
 
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPatchDevicesResponse"));
 
 	UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPatch(
@@ -1460,7 +1460,7 @@ void ANetBoxVisualizationController::RequestNetboxDevicesPatch()
 void ANetBoxVisualizationController::RequestNetboxDevicePatch(
 	const FNetboxDevice& Device
 ) {
-	FStringResponseDelegate Delegate;
+	FResponseDelegate Delegate;
 	Delegate.BindUFunction(this, FName("OnNetboxPatchDeviceResponse"));
 
 	TArray<FNetboxDevice> Devices;
