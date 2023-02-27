@@ -39,6 +39,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshotRange(
 	FString Url = G2APIUrl + "api/tsrange/-1/0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Bearer " + G2BearerToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -59,6 +60,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestSnapshot(
 	FString Url = G2APIUrl + "api/snapshot?id=" + FString::FromInt(SnapshotID);
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Bearer " + G2BearerToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -89,6 +91,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxGet(
 	FResponseDelegate OnNetboxResponse
 ) {
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -108,6 +111,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionsGet(
 	FString Url = NetboxUrl + "/dcim/regions/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -128,6 +132,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRegionPatch(
 	FString Url = NetboxUrl + "/dcim/regions/";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	FString RequestBody = 
@@ -153,6 +158,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitesGet(
 	FString Url = NetboxUrl + "/dcim/sites/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -173,6 +179,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxSitePatch(
 	FString Url = NetboxUrl + "/dcim/sites/";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	FString RequestBody = 
@@ -197,6 +204,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGet(
 	FString Url = NetboxUrl + "/dcim/locations/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -218,6 +226,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationsGetBySite(
 		NetboxUrl + "/dcim/locations/?limit=0&offset=0&site=" +	Site.Slug;
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -238,6 +247,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxLocationPatch(
 	FString Url = NetboxUrl + "/dcim/locations/";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	FString RequestBody = 
@@ -264,6 +274,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGet(
 	FString Url = NetboxUrl + "/dcim/racks/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -284,6 +295,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGetBySite(
 	FString Url = NetboxUrl + "/dcim/racks/?limit=0&offset=0&site=" + Site.Slug;
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -304,6 +316,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRacksGetByLocation(
 	FString Url = NetboxUrl + "/dcim/racks/?limit=0&offset=0&location=" + Location.Slug;
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -324,6 +337,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxRackPatch(
 	FString Url = NetboxUrl + "/dcim/racks/";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	FString RequestBody = 
@@ -356,6 +370,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDeviceTypesGet(
 	FString Url = NetboxUrl + "/dcim/device-types/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -375,6 +390,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesGet(
 	FString Url = NetboxUrl + "/dcim/devices/?limit=0&offset=0";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	UReztlyFunctionLibrary::MakeRequest(
@@ -395,6 +411,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPost(
 	FString Url = NetboxUrl + "/dcim/devices/";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	FString RequestBody = "[";
@@ -438,6 +455,7 @@ void UCesiumNetBoxVisualizationRequestLibrary::RequestNetboxDevicesPatch(
 	FString Url = NetboxUrl + "/dcim/devices/";
 
 	TMap<FString, FString> Headers;
+	Headers.Add("Content-Type", "application/json");
 	Headers.Add("Authorization", "Token " + NetboxToken);
 
 	FString RequestBody = "[";
