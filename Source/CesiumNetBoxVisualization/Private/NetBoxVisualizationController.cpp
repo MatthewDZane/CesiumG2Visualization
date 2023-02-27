@@ -61,10 +61,13 @@ void ANetBoxVisualizationController::OnBearerTokenResponse(
 		UE_LOG(LogTemp, Log, TEXT("Login Successful"));
 		UE_LOG(LogTemp, Log, TEXT("Response Body: %s"),
 			*ResponseContentString);
-		UReztlyJsonObject* JsonObject = 
-			UReztlyFunctionLibrary::StringToJson(ResponseContentString);
+		EReztlyResult Result;
+		UReztlyJsonObject* JsonObject = UReztlyFunctionLibrary::StringToJson(
+			Result, 
+			ResponseContentString
+		);
 		
-		if (JsonObject != nullptr) {
+		if (Result == EReztlyResult::Valid) {
 			bool TokenFound;
 			JsonObject->GetFieldValueAsString("token", G2Token, TokenFound);
 
