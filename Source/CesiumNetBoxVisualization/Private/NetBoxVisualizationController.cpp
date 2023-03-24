@@ -718,6 +718,14 @@ void ANetBoxVisualizationController::ParseFlowData(
 				&FlowInfo
 			)
 		) {
+			/* edge case: skip when either src_ip or dest_ip are missing.
+				The G2 response snapshot topology nodes do not contain ip */
+			if (!Snapshot->IPToNodeMap.Contains(FlowInfo.Src_ip) ||
+					!Snapshot->IPToNodeMap.Contains(FlowInfo.Dst_ip))
+			{
+				continue;
+			}
+
 			UG2Node* StartNode = *Snapshot->IPToNodeMap.Find(FlowInfo.Src_ip);
 			UG2Node* EndNode = *Snapshot->IPToNodeMap.Find(FlowInfo.Dst_ip);
 
