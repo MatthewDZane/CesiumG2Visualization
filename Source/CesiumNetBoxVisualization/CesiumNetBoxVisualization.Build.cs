@@ -31,6 +31,10 @@ public class CesiumNetBoxVisualization : ModuleRules
                 "HTTP",
                 "Json",
                 "JsonUtilities",
+                "ImageWrapper",
+				"RHI",
+				"RenderCore"
+
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

@@ -468,6 +468,14 @@ void ANetBoxVisualizationController::ParseUE4Data(const FUE4Response& UE4Respons
 				break;
 			}
 
+			/* edge case: skip when either src_ip or dest_ip are missing.
+			   The G2 response snapshot topology nodes do not contain ip */
+			if (!Snapshot->IPToNodeMap.Contains(SourceIP) ||
+				!Snapshot->IPToNodeMap.Contains(TargetIP))
+			{
+				continue;
+			}
+
 			G2Link.Source = *Snapshot->IDToNodeMap.Find(SourceIP);
 			G2Link.Target = *Snapshot->IDToNodeMap.Find(TargetIP);
 
@@ -856,6 +864,7 @@ void ANetBoxVisualizationController::OnNetboxRegionsGetResponse(
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Netbox Request Unsuccessful"));
+	OnSnapshotUpdate();
 }
 
 void ANetBoxVisualizationController::RequestNetboxRegionPatch(
