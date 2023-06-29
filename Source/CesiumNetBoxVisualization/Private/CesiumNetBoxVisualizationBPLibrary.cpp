@@ -12,12 +12,6 @@
 
 #include "RHICommandList.h"
 
-
-
-// Static ImageWrapperModule to prevent reloading -> this thing does not like to be reloaded..
-static IImageWrapperModule &ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-
-
 UCesiumNetBoxVisualizationBPLibrary::UCesiumNetBoxVisualizationBPLibrary(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
