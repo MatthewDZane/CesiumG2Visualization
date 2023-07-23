@@ -20,7 +20,7 @@
 <br />
 <div align="center">
   <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">
-    <img src="images/CesiumExample.png" alt="CesiumExample" width="80" height="80">
+    <img src="Resources/GlobalView.png" alt="GlobalView" width="700" height="400">
   </a>
 
   <h3 align="center">Cesium G2 Visualization</h3>
@@ -30,12 +30,7 @@
     <br />
     <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization"><strong>Explore the docs »</strong></a>
     <br />
-    <br />
-    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">View Demo</a>
-    ·
-    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">Report Bug</a>
-    ·
-    <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">Request Feature</a>
+    </a>
   </p>
 </div>
 
@@ -72,8 +67,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
 This project is an Unreal Engine 5 Plugin that utilizes [Cesium for Unreal](https://cesium.com/platform/cesium-for-unreal/) to generate and display a 3D globe and street view of a [NetBox Database](https://netbox.dev/). It is possible to use Unreal Engine 4, but this repository has been tested only with Unreal Engine 5.
 
 This plugin was originally created to display the G2 Trace Graph from the [Qualcomm AI Research Department](https://www.qualcomm.com/research/artificial-intelligence/ai-research). However, the main purpose has centered on NetBox functionality. Additionally, the Data Utils Trace Graph will used in the event that the G2 Trace Graph in inaccessible.
@@ -97,7 +90,11 @@ This project requires several Unreal Engine 5 and non-Unreal Engine 5 libraries.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+<div align="center">
+  <a href="https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization">
+    <img src="Resources/UCSDView.png" alt="UCSDView" width="700" height="400">
+  </a>
+</div>
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -223,4 +220,3 @@ Use this space to list resources you find helpful and would like to give credit 
 [issues-url]: https://gitlab.nrp-nautilus.io/MatthewZane/CesiumNetBoxVisualization/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/matthewdzane
-[product-screenshot]: images/screenshot.png
